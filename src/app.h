@@ -12,7 +12,7 @@
 #include <emscripten/html5.h>
 #include <webgl/webgl2.h>
 
-//#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #include "renderer.h"
 
@@ -44,7 +44,7 @@ class App
         GLuint vbo, vao, ebo;
         GLFWwindow* pWindow;
 
-        unsigned int shader;
+        GLuint shader;
         const char *vertexShaderSource =
             "attribute vec3 aPos;\n"
             "void main()\n"
@@ -52,10 +52,9 @@ class App
             "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
             "}\0";
         const char *fragmentShaderSource =
-        //    "out vec4 FragColor;\n"
             "void main()\n"
             "{\n"
-            "   gl_FragColor = vec4(1.0, 0.5, 0.2, 1.0);\n"
+            "   gl_FragColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
             "}\n\0";
 
 

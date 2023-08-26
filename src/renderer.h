@@ -19,7 +19,7 @@ class Renderer
         Renderer(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight);
         ~Renderer();
 
-        static void Draw(GLuint &vao, GLuint shader);
+        static void Draw(GLuint &vbo, GLuint shader);
         static bool Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight,
                               GLFWframebuffersizefun Framebuffer_Size_Callback);
         static bool Init_WebGL(uint32_t nWidth, uint32_t nHeight,

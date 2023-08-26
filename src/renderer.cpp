@@ -15,14 +15,17 @@ Renderer::~Renderer()
 
 
 
-void Renderer::Draw(GLuint &vao, GLuint shader)
+void Renderer::Draw(GLuint &vbo, GLuint shader)
 {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader);
 
-    glBindVertexArray(vao);
+    //glBindVertexArray(vao);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo); 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
