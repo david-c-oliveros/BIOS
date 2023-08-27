@@ -1,12 +1,17 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <GL/gl.h>
 
 #include <memory>
 #include <assert.h>
 
+#include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
 
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
@@ -15,13 +20,14 @@
 #include <GLES3/gl3.h>
 
 #include "renderer.h"
+#include "shader.h"
+#include "object.h"
 
 
 
 void Framebuffer_Size_Callback(GLFWwindow* pWindow, int nWidth, int nHeight);
 void processInput(GLFWwindow* pWindow);
 
-void load_geo(float* vertices, unsigned int* indices);
 void compile_shaders();
 
 
@@ -34,7 +40,8 @@ class App
 
         void Create();
         void Update();
-        void CompileShaders();
+        void Render();
+        void LoadShaders();
         void load_geo(float* vertices, unsigned int* indices);
 
 
@@ -43,6 +50,10 @@ class App
         uint32_t nCanvasHeight;
         GLuint vbo, vao, ebo;
         GLFWwindow* pWindow;
+
+        Shader cShader;
+
+        std::unique_ptr<Object> cCube;
 
         GLuint shader;
         const char *vertexShaderSource =

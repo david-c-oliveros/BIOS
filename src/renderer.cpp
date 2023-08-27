@@ -15,16 +15,22 @@ Renderer::~Renderer()
 
 
 
-void Renderer::Draw(GLuint &vbo, GLuint shader)
+void Renderer::Clear(glm::vec4 vClearColor)
 {
-    glClearColor(0.2f, 0.2f, 0.3f, 1.0f);
+    glClearColor(vClearColor.x, vClearColor.y, vClearColor.z, vClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
+}
+
+
+
+void Renderer::Draw(GLuint &vbo, GLuint shader, GLuint nNumVert)
+{
 
     glUseProgram(shader);
 
     //glBindVertexArray(vao);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, nNumVert, GL_UNSIGNED_INT, 0);
     //glBindBuffer(GL_ARRAY_BUFFER, vbo); 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }

@@ -33,11 +33,10 @@ void App::Create()
     Renderer::Init_GLFW(pWindow, nCanvasWidth, nCanvasHeight, Framebuffer_Size_Callback);
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, attrs);
 
-    CompileShaders();
+    LoadShaders();
 
-    load_geo(vertices, indices);
-
-    std::cout << "Create" << std::endl;
+    cCube = std::make_unique<Object>("/res/cube.obj");
+//    load_geo(vertices, indices);
 }
 
 
@@ -45,7 +44,7 @@ void App::Update()
 {
     processInput(pWindow);
 
-    Renderer::Draw(vbo, shader);
+    Render();
 
     //glfwSwapBuffers(pWindow);
     glfwPollEvents();
@@ -53,75 +52,45 @@ void App::Update()
 
 
 
-void App::load_geo(float* vertices, unsigned int* indices)
+void App::Render()
 {
-    // TODO - Finish setting up vao
-//    glGenVertexArrays(1, &vao);
-//    glBindVertexArray(vao);
+    Renderer::Clear(glm::vec4(0.1f, 0.1f, 0.3f, 1.0f));
 
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::cout << "vertices: " << sizeof(vertices) << std::endl;
-    std::cout << sizeof(float) << std::endl;
-    std::cout << sizeof(unsigned int) << std::endl;
-    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    std::cout << "indices: " << sizeof(indices) << std::endl;
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(indices), indices, GL_STATIC_DRAW);
-
-    GLuint aPosLoc = glGetAttribLocation(shader, "aPos");
-    std::cout << "Attribute location: " << aPosLoc << std::endl;
-
-    glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(aPosLoc);
-
-//    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    cCube->Draw(cShader);
 }
 
 
 
-void App::CompileShaders()
+//void App::load_geo(float* vertices, unsigned int* indices)
+//{
+//    std::cout << "load_geo\n";
+//    // TODO - Finish setting up vao
+////    glGenVertexArrays(1, &vao);
+////    glBindVertexArray(vao);
+//
+//    glGenBuffers(1, &vbo);
+//    glGenBuffers(1, &ebo);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(vertices), vertices, GL_STATIC_DRAW);
+//
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(indices), indices, GL_STATIC_DRAW);
+//
+////    GLuint aPosLoc = glGetAttribLocation(shader, "aPos");
+////    std::cout << "Attribute location: " << aPosLoc << std::endl;
+//
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+//    glEnableVertexAttribArray(0);
+//
+////    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+//}
+
+
+
+void App::LoadShaders()
 {
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // check for shader compile errors
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // fragment shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // check for shader compile errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // link shaders
-    shader = glCreateProgram();
-    glAttachShader(shader, vertexShader);
-    glAttachShader(shader, fragmentShader);
-    glLinkProgram(shader);
-    // check for linking errors
-    glGetProgramiv(shader, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shader
-                , 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    cShader.Create("shaders/color_vs.shader", "shaders/color_fs.shader");
 }
 
 
