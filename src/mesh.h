@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "renderer.h"
 #include "shader.h"
 
@@ -55,4 +57,6 @@ class Mesh
 
     private:
         void SetupMesh();
+
+        bool bDebug = true;
 };

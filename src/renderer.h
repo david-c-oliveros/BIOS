@@ -10,10 +10,8 @@
 
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
+#include <emscripten/html5_webgl.h>
 #include <webgl/webgl2.h>
-
-
-static EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
 
 
 class Renderer
@@ -23,11 +21,11 @@ class Renderer
         ~Renderer();
 
         static void Clear(glm::vec4 vClearColor);
-        static void Draw(GLuint &vbo, GLuint shader, GLuint nNumVert);
+        static void Draw(GLuint &vao, GLuint &vbo, GLuint shader, GLuint nNumVert);
 
-        static bool Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight,
-                              GLFWframebuffersizefun Framebuffer_Size_Callback);
+        static bool Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight);
         static bool Init_WebGL(uint32_t nWidth, uint32_t nHeight,
+                               EMSCRIPTEN_WEBGL_CONTEXT_HANDLE &glContext,
                                EmscriptenWebGLContextAttributes &attrs);
 
 

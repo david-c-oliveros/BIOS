@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
     src/mesh.cpp
     src/model.cpp
     src/object.cpp
+    src/box_collider.cpp
     src/shader.cpp
     src/stb_image.cpp
     )

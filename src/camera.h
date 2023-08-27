@@ -11,8 +11,6 @@
 
 #include <vector>
 
-#include "box_collider.h"
-
 
 enum Camera_Movement
 {
@@ -43,18 +41,16 @@ class Camera
         glm::vec3 Right;
         glm::vec3 WorldUp;
 
-        float Yaw;
-        float Pitch;
-        float Floor;
-        float MovementSpeed;
-        float SprintSpeed;
-        float MouseSensitivity;
-        float Zoom;
+        float fYaw;
+        float fPitch;
+        float fFloor;
+        float fMovementSpeed;
+        float fSprintSpeed;
+        float fMouseSensitivity;
+        float fZoom;
 
         bool bSprint;
         bool bConstrainToFloor;
-
-        BoxCollider cCollider;
 
         Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
                float yaw = YAW, float pitch = PITCH);
@@ -67,8 +63,6 @@ class Camera
 
         void PrintvPos();
         void SetPosVel(glm::vec3 newPos);
-        void UpdatePos(glm::vec3 velocityVec);
-        void UpdateNextPos(glm::vec3 velocityVec);
 
     private:
         void updateCameraVectors();

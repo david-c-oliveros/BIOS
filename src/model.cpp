@@ -79,10 +79,10 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
         if (mesh->mTextureCoords[0])
         {
-            glm::vec2 vec;
-            vec.x = mesh->mTextureCoords[0][i].x;
-            vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.TexCoords = vec;
+            glm::vec2 v;
+            v.x = mesh->mTextureCoords[0][i].x;
+            v.y = mesh->mTextureCoords[0][i].y;
+            vertex.TexCoords = v;
         }
         else
         {

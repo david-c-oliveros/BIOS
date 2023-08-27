@@ -12,6 +12,8 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
@@ -22,13 +24,15 @@
 #include "renderer.h"
 #include "shader.h"
 #include "object.h"
+#include "camera.h"
 
 
 
 void Framebuffer_Size_Callback(GLFWwindow* pWindow, int nWidth, int nHeight);
+EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userData);
+EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
+EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData);
 void processInput(GLFWwindow* pWindow);
-
-void compile_shaders();
 
 
 
@@ -39,6 +43,7 @@ class App
         ~App();
 
         void Create();
+        void GLFWConfig();
         void Update();
         void Render();
         void LoadShaders();
@@ -51,25 +56,14 @@ class App
         GLuint vbo, vao, ebo;
         GLFWwindow* pWindow;
 
+        Camera cCamera;
         Shader cShader;
 
         std::unique_ptr<Object> cCube;
 
         GLuint shader;
-        const char *vertexShaderSource =
-            "attribute vec3 aPos;\n"
-            "void main()\n"
-            "{\n"
-            "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-            "}\0";
-        const char *fragmentShaderSource =
-            "void main()\n"
-            "{\n"
-            "   gl_FragColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
-            "}\n\0";
 
-
-
+    private:
         EmscriptenWebGLContextAttributes attrs;
-        std::unique_ptr<Renderer> cRenderer;
+        EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
 };

@@ -23,12 +23,12 @@ void Renderer::Clear(glm::vec4 vClearColor)
 
 
 
-void Renderer::Draw(GLuint &vbo, GLuint shader, GLuint nNumVert)
+void Renderer::Draw(GLuint &vao, GLuint &vbo, GLuint shader, GLuint nNumVert)
 {
 
     glUseProgram(shader);
 
-    //glBindVertexArray(vao);
+    emscripten_glBindVertexArrayOES(vao);
 
     glDrawElements(GL_TRIANGLES, nNumVert, GL_UNSIGNED_INT, 0);
     //glBindBuffer(GL_ARRAY_BUFFER, vbo); 
@@ -37,7 +37,7 @@ void Renderer::Draw(GLuint &vbo, GLuint shader, GLuint nNumVert)
 
 
 
-bool Renderer::Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight, GLFWframebuffersizefun Framebuffer_Size_Callback)
+bool Renderer::Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -52,7 +52,6 @@ bool Renderer::Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight,
         return false;
     }
     glfwMakeContextCurrent(pWindow);
-    glfwSetFramebufferSizeCallback(pWindow, Framebuffer_Size_Callback);
 
     std::cout << "Init GLFW" << std::endl;
 
@@ -61,7 +60,7 @@ bool Renderer::Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight,
 
 
 
-bool Renderer::Init_WebGL(uint32_t nWidth, uint32_t nHeight, EmscriptenWebGLContextAttributes &attrs)
+bool Renderer::Init_WebGL(uint32_t nWidth, uint32_t nHeight, EMSCRIPTEN_WEBGL_CONTEXT_HANDLE &glContext, EmscriptenWebGLContextAttributes &attrs)
 {
     double dpr = emscripten_get_device_pixel_ratio();
     emscripten_set_element_css_size("#canvas", nWidth / dpr, nHeight / dpr);
@@ -75,6 +74,8 @@ bool Renderer::Init_WebGL(uint32_t nWidth, uint32_t nHeight, EmscriptenWebGLCont
     glContext = emscripten_webgl_create_context("#canvas", &attrs);
     assert(glContext);
     emscripten_webgl_make_context_current(glContext);
+
+    //assert(emscripten_webgl_enable_OES_vertex_array_object(glContext));
 
     std::cout << "Init WebGL" << std::endl;
 

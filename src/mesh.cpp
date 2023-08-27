@@ -3,14 +3,12 @@
 
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
-//    : vbo([this]() -> GLuint { GLuint vbo; glGenBuffers(1, &vbo); return vbo; }()),
-//      ebo([this]() -> GLuint { GLuint ebo; glGenBuffers(1, &ebo); return ebo; }())
 {
     this->vertices = vertices;
     this->indices  = indices;
     this->textures = textures;
 
-    //SetupMesh();
+    SetupMesh();
 }
 
 
@@ -38,7 +36,7 @@ void Mesh::Draw(Shader &shader)
     /***************************/
     /*        Draw Mesh        */
     /***************************/
-    Renderer::Draw(vbo, shader.ID, indices.size());
+    Renderer::Draw(vao, vbo, shader.ID, indices.size());
     //glBindVertexArray(vao);
     //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     //glBindVertexArray(0);
@@ -48,13 +46,11 @@ void Mesh::Draw(Shader &shader)
 
 void Mesh::SetupMesh()
 {
-//    glGenVertexArrays(1, &vao);
-    std::cout << "will gen buffers" << std::endl;
+    emscripten_glGenVertexArraysOES(1, &vao);
     glGenBuffers(1, &vbo);
-    std::cout << "gen vbo" << std::endl;
-//    glGenBuffers(1, &ebo);
+    glGenBuffers(1, &ebo);
 
-//    glBindVertexArray(vao);
+    emscripten_glBindVertexArrayOES(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
