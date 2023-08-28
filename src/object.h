@@ -11,13 +11,12 @@ class Object
         Object(std::string sPath, glm::vec3 _vPos = glm::vec3(0.0f), float _fRotAngle = 0.0f);
 
         void Create(std::unique_ptr<Model> _pModel, glm::vec3 pos, float _fRotAngle);
-        void Draw(Shader &shader);
+        void Draw(Shader &cShader);
 
 
     public:
         glm::vec3 vPos;
-        glm::vec3 vNextPos;
-        glm::vec3 vVel;
+        glm::vec3 vCol;
         float fRotAngle;
 
 

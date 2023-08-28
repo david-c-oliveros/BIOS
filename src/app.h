@@ -6,6 +6,7 @@
 
 #include <GL/gl.h>
 
+#include <array>
 #include <memory>
 #include <assert.h>
 
@@ -25,14 +26,24 @@
 #include "shader.h"
 #include "object.h"
 #include "camera.h"
+#include "world.h"
 
+
+
+enum class WASD
+{
+    W,
+    A,
+    S,
+    D
+};
 
 
 void Framebuffer_Size_Callback(GLFWwindow* pWindow, int nWidth, int nHeight);
 EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userData);
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
+EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData);
-void processInput(GLFWwindow* pWindow);
 
 
 
@@ -47,7 +58,7 @@ class App
         void Update();
         void Render();
         void LoadShaders();
-        void load_geo(float* vertices, unsigned int* indices);
+        void ProcessInput();
 
 
     public:
@@ -56,14 +67,16 @@ class App
         GLuint vbo, vao, ebo;
         GLFWwindow* pWindow;
 
-        Camera cCamera;
         Shader cShader;
 
         std::unique_ptr<Object> cCube;
+        std::unique_ptr<World> cWorld;
 
         GLuint shader;
 
     private:
         EmscriptenWebGLContextAttributes attrs;
         EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
+
+        glm::vec3 vFogColor = glm::vec3(0.01f, 0.01f, 0.01f);
 };

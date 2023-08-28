@@ -18,7 +18,7 @@ Renderer::~Renderer()
 void Renderer::Clear(glm::vec4 vClearColor)
 {
     glClearColor(vClearColor.x, vClearColor.y, vClearColor.z, vClearColor.w);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
@@ -31,7 +31,6 @@ void Renderer::Draw(GLuint &vao, GLuint &vbo, GLuint shader, GLuint nNumVert)
     emscripten_glBindVertexArrayOES(vao);
 
     glDrawElements(GL_TRIANGLES, nNumVert, GL_UNSIGNED_INT, 0);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo); 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 

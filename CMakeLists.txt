@@ -9,6 +9,7 @@ project(App)
 
 add_executable(${PROJECT_NAME}
     external/glad/glad.c
+    src/stb_image.cpp
     src/main.cpp
     src/app.cpp
     src/renderer.cpp
@@ -18,7 +19,7 @@ add_executable(${PROJECT_NAME}
     src/object.cpp
     src/box_collider.cpp
     src/shader.cpp
-    src/stb_image.cpp
+    src/world.cpp
     )
 
 #add_subdirectory(external/glfw)

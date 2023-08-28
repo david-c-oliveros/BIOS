@@ -23,7 +23,7 @@ enum Camera_Movement
 };
 
 const float YAW          = -90.0f;
-const float PITCH        = 0.0f;
+const float PITCH        = -45.0f;
 const float WALK_SPEED   = 4.0f;
 const float SPRINT_SPEED = 9.0f;
 const float SENSITIVITY  = 0.05f;
@@ -65,7 +65,7 @@ class Camera
         void SetPosVel(glm::vec3 newPos);
 
     private:
-        void updateCameraVectors();
+        void UpdateCameraVectors();
 };
 
 #endif

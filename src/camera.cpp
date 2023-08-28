@@ -12,7 +12,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     WorldUp = up;
     fYaw = yaw;
     fPitch = pitch;
-    updateCameraVectors();
+    UpdateCameraVectors();
 }
 
 
@@ -27,7 +27,7 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
     WorldUp = glm::vec3(upX, upY, upZ);
     fYaw = yaw;
     fPitch = pitch;
-    updateCameraVectors();
+    UpdateCameraVectors();
 }
 
 
@@ -73,7 +73,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConst
             fPitch = -89.0f;
     }
 
-    updateCameraVectors();
+    UpdateCameraVectors();
 }
 
 
@@ -88,7 +88,7 @@ void Camera::ProcessMouseScroll(float yoffset)
 }
 
 
-void Camera::updateCameraVectors()
+void Camera::UpdateCameraVectors()
 {
     glm::vec3 front;
     front.x = cos(glm::radians(fYaw)) * cos(glm::radians(fPitch));
@@ -99,6 +99,7 @@ void Camera::updateCameraVectors()
     Right = glm::normalize(glm::cross(Front, WorldUp));
     Up    = glm::normalize(glm::cross(Right, Front));
 }
+
 
 
 void Camera::PrintvPos()
