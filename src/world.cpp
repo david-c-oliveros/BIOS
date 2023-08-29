@@ -2,24 +2,34 @@
 
 
 
-World::World(uint32_t nWorldWidth, uint32_t nWorldLength)
+World::World(glm::ivec2 _vWorldSize)
+    : vWorldSize(_vWorldSize)
 {
     cTileObj = std::make_unique<Object>("/res/tile.obj");
     srand(123);
-    for (int i = 0; i < nWorldWidth; i++)
+    for (int i = 0; i < vWorldSize.x; i++)
     {
-        for (int j = 0; j < nWorldLength; j++)
+        for (int j = 0; j < vWorldSize.y; j++)
         {
             TileInst t;
             t.vPos = glm::vec3(i, 0, j);
-            t.vCol = glm::vec3(glm::linearRand(0.0f, 1.0f),
-                                 glm::linearRand(0.0f, 1.0f),
-                                 glm::linearRand(0.0f, 1.0f));
+
+            if (i % 2 == 0 && j % 2 == 0)
+            {
+                t.vCol = glm::vec3(0.5f, 0.2f, 0.2f);
+                t.bSolid = true;
+                t.bDebug = false;
+            }
+            else
+            {
+                t.vCol = glm::vec3(0.2f, 0.2f, 0.5f);
+                t.bSolid = false;
+                t.bDebug = false;
+            }
+
             vTiles.push_back(t);
         }
     }
-    
-    std::cout << "World generated" << std::endl;
 }
 
 
@@ -36,6 +46,8 @@ void World::Draw(Shader &cShader)
     {
         cTileObj->vPos = tile.vPos;
         cTileObj->vCol = tile.vCol;
+        if (tile.bDebug)
+            cTileObj->vCol = glm::vec3(0.0f, 0.5f, 0.0f);
         cTileObj->Draw(cShader);
     }
 }

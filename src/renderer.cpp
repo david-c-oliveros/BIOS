@@ -23,10 +23,10 @@ void Renderer::Clear(glm::vec4 vClearColor)
 
 
 
-void Renderer::Draw(GLuint &vao, GLuint &vbo, GLuint shader, GLuint nNumVert)
+void Renderer::Draw(GLuint &vao, GLuint &vbo, GLuint shaderID, GLuint nNumVert)
 {
 
-    glUseProgram(shader);
+    glUseProgram(shaderID);
 
     emscripten_glBindVertexArrayOES(vao);
 
@@ -52,8 +52,6 @@ bool Renderer::Init_GLFW(GLFWwindow* pWindow, uint32_t nWidth, uint32_t nHeight)
     }
     glfwMakeContextCurrent(pWindow);
 
-    std::cout << "Init GLFW" << std::endl;
-
     return true;
 }
 
@@ -75,8 +73,6 @@ bool Renderer::Init_WebGL(uint32_t nWidth, uint32_t nHeight, EMSCRIPTEN_WEBGL_CO
     emscripten_webgl_make_context_current(glContext);
 
     //assert(emscripten_webgl_enable_OES_vertex_array_object(glContext));
-
-    std::cout << "Init WebGL" << std::endl;
 
     return true;
 }

@@ -2,13 +2,22 @@
 
 
 
-Camera cCamera(glm::vec3(0.0f, 10.0f, 10.0f));
+/**********************************/
+/*        Global Variables        */
+/**********************************/
+
+float fDeltaTime = 0.0f;
+float fLastFrame = 0.0f;
+
+Camera cCamera(glm::vec3(0.0f, 10.0f, 0.0f));
 float fLast_X = 0.0f;
 float fLast_Y = 0.0f;
 
 bool bFirstMouse = true;
 
-std::array<bool, 4> aKeyStates;
+std::array<bool, 8> aKeyStates;
+
+/**********************************/
 
 
 
@@ -32,22 +41,44 @@ void App::Create()
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, glContext, attrs);
     GLFWConfig();
 
-    cWorld = std::make_unique<World>(16, 16);
-    cCube = std::make_unique<Object>("/res/tile.obj");
+    pWorld = std::make_shared<World>(glm::ivec2(16, 16));
+    pPlayer = std::make_unique<Player>(pWorld, "/res/robot.obj");
+    pPlayer->vPos = glm::vec3(8.5f, 0.4f, 8.5f);
+    pPlayer->vCol = glm::vec3(0.3f, 0.3f, 0.45f);
+    pPlayer->fShininess = 128.0f;
 
-    aKeyStates = { false, false, false, false };
+    for (int i = 0; i < 8; i++)
+    {
+        aKeyStates[i] = false;
+    }
 
     LoadShaders();
 }
 
 
+
+/************************/
+/*        Update        */
+/************************/
 void App::Update()
 {
+    SetDeltaTime();
+    std::cout << "Frame time: " << fDeltaTime << std::endl;
     ProcessInput();
+    pPlayer->Update(fDeltaTime);
     Render();
 
     glfwSwapBuffers(pWindow);
     glfwPollEvents();
+}
+
+
+
+void App::SetDeltaTime()
+{
+    float fCurrentFrame = static_cast<float>(glfwGetTime());
+    fDeltaTime = fCurrentFrame - fLastFrame;
+    fLastFrame = fCurrentFrame;
 }
 
 
@@ -64,10 +95,8 @@ void App::Render()
     cShader.SetMat4("mProjection", mProjection);
     cShader.SetVec3("vViewPos", cCamera.vPos);
 
-    cWorld->Draw(cShader);
-//    cCube->fRotAngle = 50.0f * glfwGetTime();
-//    cCube->vPos = glm::vec3(0.0f, 0.0f, -10.0f);
-//    cCube->Draw(cShader);
+    pWorld->Draw(cShader);
+    pPlayer->Draw(cShader);
 }
 
 
@@ -106,14 +135,24 @@ void App::GLFWConfig()
 
 void App::ProcessInput()
 {
-    if (aKeyStates[(size_t)WASD::W])
+    if (aKeyStates[(size_t)KEYS::W])
         cCamera.ProcessKeyboard(Camera_Movement::FORWARD, 0.1, false);
-    if (aKeyStates[(size_t)WASD::S])
+    if (aKeyStates[(size_t)KEYS::S])
         cCamera.ProcessKeyboard(Camera_Movement::BACKWARD, 0.1, false);
-    if (aKeyStates[(size_t)WASD::A])
+    if (aKeyStates[(size_t)KEYS::A])
         cCamera.ProcessKeyboard(Camera_Movement::LEFT, 0.1, false);
-    if (aKeyStates[(size_t)WASD::D])
+    if (aKeyStates[(size_t)KEYS::D])
         cCamera.ProcessKeyboard(Camera_Movement::RIGHT, 0.1, false);
+
+    pPlayer->vVel = glm::vec2(0.0f, 0.0f);
+    if (aKeyStates[(size_t)KEYS::UP])
+        pPlayer->ProcessMovement(EntityMovement::FORWARD, 0.1);
+    if (aKeyStates[(size_t)KEYS::DOWN])
+        pPlayer->ProcessMovement(EntityMovement::BACKWARD, 0.1);
+    if (aKeyStates[(size_t)KEYS::LEFT])
+        pPlayer->ProcessMovement(EntityMovement::LEFT, 0.1);
+    if (aKeyStates[(size_t)KEYS::RIGHT])
+        pPlayer->ProcessMovement(EntityMovement::RIGHT, 0.1);
 }
 
 
@@ -132,27 +171,6 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
 
     cCamera.ProcessMouseMovement(e->movementX, -e->movementY);
 
-//    float xpos = static_cast<float>(e->movementX);
-//    float ypos = static_cast<float>(e->movementY);
-
-//    float xpos = e->movementX;
-//    float ypos = e->movementY;
-//
-//    if (bFirstMouse)
-//    {
-//        fLast_X = xpos;
-//        fLast_Y = xpos;
-//        bFirstMouse = false;
-//    }
-//
-//    float xoffset = xpos - fLast_X;
-//    float yoffset = fLast_Y - ypos;
-//
-//    fLast_X = xpos;
-//    fLast_Y = ypos;
-//
-//    cCamera.ProcessMouseMovement(xoffset, yoffset);
-
     return 0;
 }
 
@@ -160,17 +178,23 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
 
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData)
 {
-    if (!strcmp(e->key, "Enter"))
-        emscripten_request_pointerlock("#canvas", 1);
-
     if (!strcmp(e->key, "w"))
-        aKeyStates[(size_t)WASD::W] = true;
+        aKeyStates[(size_t)KEYS::W] = true;
     if (!strcmp(e->key, "s"))
-        aKeyStates[(size_t)WASD::S] = true;
+        aKeyStates[(size_t)KEYS::S] = true;
     if (!strcmp(e->key, "a"))
-        aKeyStates[(size_t)WASD::A] = true;
+        aKeyStates[(size_t)KEYS::A] = true;
     if (!strcmp(e->key, "d"))
-        aKeyStates[(size_t)WASD::D] = true;
+        aKeyStates[(size_t)KEYS::D] = true;
+
+    if (!strcmp(e->key, "ArrowUp"))
+        aKeyStates[(size_t)KEYS::UP] = true;
+    if (!strcmp(e->key, "ArrowDown"))
+        aKeyStates[(size_t)KEYS::DOWN] = true;
+    if (!strcmp(e->key, "ArrowLeft"))
+        aKeyStates[(size_t)KEYS::LEFT] = true;
+    if (!strcmp(e->key, "ArrowRight"))
+        aKeyStates[(size_t)KEYS::RIGHT] = true;
 
     return 0;
 }
@@ -179,17 +203,26 @@ EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* u
 
 EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData)
 {
-    if (!strcmp(e->key, "Enter"))
+    if (!strcmp(e->key, " "))
         emscripten_request_pointerlock("#canvas", 1);
 
     if (!strcmp(e->key, "w"))
-        aKeyStates[(size_t)WASD::W] = false;
+        aKeyStates[(size_t)KEYS::W] = false;
     if (!strcmp(e->key, "s"))
-        aKeyStates[(size_t)WASD::S] = false;
+        aKeyStates[(size_t)KEYS::S] = false;
     if (!strcmp(e->key, "a"))
-        aKeyStates[(size_t)WASD::A] = false;
+        aKeyStates[(size_t)KEYS::A] = false;
     if (!strcmp(e->key, "d"))
-        aKeyStates[(size_t)WASD::D] = false;
+        aKeyStates[(size_t)KEYS::D] = false;
+
+    if (!strcmp(e->key, "ArrowUp"))
+        aKeyStates[(size_t)KEYS::UP] = false;
+    if (!strcmp(e->key, "ArrowDown"))
+        aKeyStates[(size_t)KEYS::DOWN] = false;
+    if (!strcmp(e->key, "ArrowLeft"))
+        aKeyStates[(size_t)KEYS::LEFT] = false;
+    if (!strcmp(e->key, "ArrowRight"))
+        aKeyStates[(size_t)KEYS::RIGHT] = false;
 
     return 0;
 }
@@ -198,7 +231,6 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
 
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData)
 {
-    std::cout << "pointerlock change callback" << std::endl;
     emscripten_request_pointerlock("#canvas", 1);
 
     return 0;

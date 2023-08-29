@@ -12,6 +12,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <box2d/box2d.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,15 +29,20 @@
 #include "object.h"
 #include "camera.h"
 #include "world.h"
+#include "player.h"
 
 
 
-enum class WASD
+enum class KEYS
 {
     W,
     A,
     S,
-    D
+    D,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
 };
 
 
@@ -56,9 +63,11 @@ class App
         void Create();
         void GLFWConfig();
         void Update();
+        void SetDeltaTime();
         void Render();
         void LoadShaders();
         void ProcessInput();
+        void InitBox2D();
 
 
     public:
@@ -69,8 +78,8 @@ class App
 
         Shader cShader;
 
-        std::unique_ptr<Object> cCube;
-        std::unique_ptr<World> cWorld;
+        std::shared_ptr<World> pWorld;
+        std::unique_ptr<Player> pPlayer;
 
         GLuint shader;
 
@@ -78,5 +87,5 @@ class App
         EmscriptenWebGLContextAttributes attrs;
         EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
 
-        glm::vec3 vFogColor = glm::vec3(0.01f, 0.01f, 0.01f);
+        glm::vec3 vFogColor = glm::vec3(0.1f, 0.1f, 0.3f);
 };

@@ -14,6 +14,8 @@ struct TileInst
 {
     glm::ivec3 vPos;
     glm::vec3 vCol;
+    bool bSolid;
+    bool bDebug;
 };
 
 
@@ -21,13 +23,14 @@ struct TileInst
 class World
 {
     public:
-        World(uint32_t nWorldWidth, uint32_t nWorldLength);
+        World(glm::ivec2 _vWorldSize);
         ~World();
 
         void Draw(Shader &cShader);
 
 
     public:
+        glm::ivec2 vWorldSize;
         std::vector<TileInst> vTiles;
         std::unique_ptr<Object> cTileObj;
         glm::vec3 vFogColor = glm::vec3(0.01f);

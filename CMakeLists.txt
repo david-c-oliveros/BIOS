@@ -7,6 +7,8 @@ find_package(OpenGL)
 
 project(App)
 
+set(BOX_2D_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../external/box2d)
+
 add_executable(${PROJECT_NAME}
     external/glad/glad.c
     src/stb_image.cpp
@@ -20,6 +22,7 @@ add_executable(${PROJECT_NAME}
     src/box_collider.cpp
     src/shader.cpp
     src/world.cpp
+    src/player.cpp
     )
 
 #add_subdirectory(external/glfw)
@@ -31,11 +34,13 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC external/glad
     PUBLIC external/stb
     PUBLIC external/glm
+    PUBLIC external/box2d/include
     PUBLIC external/assimp/include
     )
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE external/glfw/src
+    PRIVATE external/box2d/build/bin
     PRIVATE external/assimp/bin
     )
 
@@ -43,6 +48,7 @@ target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES}
     m
     dl
     assimp
+    box2d
     )
 
 set_target_properties(${PROJECT_NAME}

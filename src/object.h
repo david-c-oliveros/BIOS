@@ -17,6 +17,7 @@ class Object
     public:
         glm::vec3 vPos;
         glm::vec3 vCol;
+        float fShininess;
         float fRotAngle;
 
 
