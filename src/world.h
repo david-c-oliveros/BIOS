@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
@@ -10,11 +11,20 @@
 
 
 
+enum class TileType
+{
+    NORMAL,
+    SOLID,
+    PORTAL
+};
+
+
+
 struct TileInst
 {
     glm::ivec3 vPos;
     glm::vec3 vCol;
-    bool bSolid;
+    TileType eType;
     bool bDebug;
 };
 
@@ -23,15 +33,20 @@ struct TileInst
 class World
 {
     public:
-        World(glm::ivec2 _vWorldSize);
+        World();
         ~World();
 
         void Draw(Shader &cShader);
+        bool LoadLevel(std::string sPath);
 
 
     public:
         glm::ivec2 vWorldSize;
-        std::vector<TileInst> vTiles;
+        std::vector<TileInst> vLevelTiles;
         std::unique_ptr<Object> cTileObj;
         glm::vec3 vFogColor = glm::vec3(0.01f);
+
+
+    private:
+        bool ProcessLevel(std::vector<std::string> vvLevelStr);
 };

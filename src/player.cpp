@@ -27,22 +27,22 @@ void Player::Update(float fDeltaTime)
 void Player::Collisions(float fDeltaTime)
 {
     glm::vec2 vPlanarPos(vPos.x, vPos.z);
-    //std::cout << "Current pos: " << glm::to_string(vPos) << std::endl;
 
     glm::vec2 vPotentialPos = vPlanarPos + vVel * fDeltaTime;
-//    std::cout << "Potential pos: " << glm::to_string(vPotentialPos) << std::endl;
 
     glm::ivec2 vCurCell = glm::floor(vPlanarPos);
     glm::ivec2 vTargetCell = vPotentialPos;
     glm::ivec2 vAreaTL = glm::max(glm::min(vCurCell, vTargetCell) - glm::ivec2(1, 1), glm::ivec2(0, 0));
     glm::ivec2 vAreaBR = glm::min(glm::max(vCurCell, vTargetCell) + glm::ivec2(1, 1), pWorld->vWorldSize);
 
-    for (auto &tile : pWorld->vTiles)
+    for (auto &tile : pWorld->vLevelTiles)
     {
-        if (tile.bSolid)
+        if (tile.eType == TileType::SOLID)
             tile.vCol = glm::vec3(0.5f, 0.2f, 0.2f);
-        else
+        else if (tile.eType == TileType::NORMAL)
             tile.vCol = glm::vec3(0.2f, 0.2f, 0.5f);
+        else
+            tile.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
     }
 
     glm::ivec2 vCell;
@@ -53,9 +53,9 @@ void Player::Collisions(float fDeltaTime)
             if (vCell.x >= pWorld->vWorldSize.x || vCell.y >= pWorld->vWorldSize.y)
                 break;
 
-            if (pWorld->vTiles[vCell.x * pWorld->vWorldSize.y + vCell.y].bSolid)
+            if (pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].eType == TileType::SOLID)
             {
-                pWorld->vTiles[vCell.x * pWorld->vWorldSize.y + vCell.y].vCol = glm::vec3(0.5f, 0.2f, 0.2f);
+                pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].vCol = glm::vec3(0.5f, 0.2f, 0.2f);
                 glm::vec2 vNearestPoint;
 
                 /************************************************************************************************************/
@@ -81,7 +81,7 @@ void Player::Collisions(float fDeltaTime)
 
                 if (fOverlap > 0)
                 {
-                    pWorld->vTiles[vCell.x * pWorld->vWorldSize.y + vCell.y].vCol = glm::vec3(0.5f, 0.5f, 0.0f);
+                    pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].vCol = glm::vec3(0.5f, 0.5f, 0.0f);
                     glm::vec2 vNorm = glm::normalize(vRayToNearest);
 
                     if (std::isnan(vNorm.x))
@@ -97,7 +97,7 @@ void Player::Collisions(float fDeltaTime)
                 }
             }
             else
-                pWorld->vTiles[vCell.x * pWorld->vWorldSize.y + vCell.y].vCol = glm::vec3(0.0f, 0.5f, 0.0f);
+                pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].vCol = glm::vec3(0.0f, 0.5f, 0.0f);
         }
     }
 

@@ -41,7 +41,10 @@ void App::Create()
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, glContext, attrs);
     GLFWConfig();
 
-    pWorld = std::make_shared<World>(glm::ivec2(16, 16));
+    pWorld = std::make_shared<World>();
+    if (!pWorld->LoadLevel("/res/map.lvl"))
+        std::cout << "ERROR: Failed to load level" << std::endl;
+
     pPlayer = std::make_unique<Player>(pWorld, "/res/robot.obj");
     pPlayer->vPos = glm::vec3(8.5f, 0.4f, 8.5f);
     pPlayer->vCol = glm::vec3(0.3f, 0.3f, 0.45f);
