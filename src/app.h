@@ -65,6 +65,7 @@ class App
         void Update();
         void SetDeltaTime();
         void Render();
+        void PrintDebug();
         void LoadShaders();
         void ProcessInput();
         void InitBox2D();

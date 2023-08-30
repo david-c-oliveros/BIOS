@@ -53,9 +53,10 @@ void Player::Collisions(float fDeltaTime)
             if (vCell.x >= pWorld->vWorldSize.x || vCell.y >= pWorld->vWorldSize.y)
                 break;
 
-            if (pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].eType == TileType::SOLID)
+            int nCurIndex = vCell.y * pWorld->vWorldSize.x + vCell.x;
+            if (pWorld->vLevelTiles[nCurIndex].eType == TileType::SOLID)
             {
-                pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].vCol = glm::vec3(0.5f, 0.2f, 0.2f);
+                pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.5f, 0.2f, 0.2f);
                 glm::vec2 vNearestPoint;
 
                 /************************************************************************************************************/
@@ -81,7 +82,7 @@ void Player::Collisions(float fDeltaTime)
 
                 if (fOverlap > 0)
                 {
-                    pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].vCol = glm::vec3(0.5f, 0.5f, 0.0f);
+                    pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.5f, 0.5f, 0.0f);
                     glm::vec2 vNorm = glm::normalize(vRayToNearest);
 
                     if (std::isnan(vNorm.x))
@@ -96,8 +97,22 @@ void Player::Collisions(float fDeltaTime)
                     vPotentialPos = vPotentialPos - vNorm * fOverlap;
                 }
             }
+            else if (pWorld->vLevelTiles[nCurIndex].eType == TileType::PORTAL_KEY)
+            {
+                pWorld->vLevelTiles[nCurIndex].eType = TileType::NORMAL;
+                vPortalKeys.push_back(pWorld->vLevelTiles[nCurIndex].nPortalKey);
+            }
+            else if (pWorld->vLevelTiles[nCurIndex].eType == TileType::PORTAL)
+            {
+                // Check if we have a Portal Key with an id that matches
+                // that of the Portal, and if so, load into new level
+                if (CheckForIDMatch(pWorld->vLevelTiles[nCurIndex]))
+                    std::cout << "Time to load new level!" << std::endl;
+                else
+                    std::cout << "Locked! You must find the pointer to the next memory block" << std::endl;
+            }
             else
-                pWorld->vLevelTiles[vCell.y * pWorld->vWorldSize.x + vCell.x].vCol = glm::vec3(0.0f, 0.5f, 0.0f);
+                pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.0f, 0.5f, 0.0f);
         }
     }
 
@@ -120,4 +135,17 @@ void Player::ProcessMovement(EntityMovement eDir, float fDeltaTime)
 
     if (glm::length(vVel) * glm::length(vVel) > 0)
         vVel = glm::normalize(vVel);
+}
+
+
+
+bool Player::CheckForIDMatch(TileInst &sTile)
+{
+    for (auto &nKeyID : vPortalKeys)
+    {
+        if (nKeyID == sTile.nID)
+            return true;
+    }
+
+    return false;
 }

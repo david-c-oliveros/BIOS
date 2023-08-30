@@ -15,7 +15,8 @@ enum class TileType
 {
     NORMAL,
     SOLID,
-    PORTAL
+    PORTAL,
+    PORTAL_KEY
 };
 
 
@@ -26,6 +27,8 @@ struct TileInst
     glm::vec3 vCol;
     TileType eType;
     bool bDebug;
+    int32_t nPortalKey = -1;
+    uint32_t nID;
 };
 
 
@@ -45,6 +48,10 @@ class World
         std::vector<TileInst> vLevelTiles;
         std::unique_ptr<Object> cTileObj;
         glm::vec3 vFogColor = glm::vec3(0.01f);
+
+
+    private:
+        uint32_t nCurUUID = 0;
 
 
     private:

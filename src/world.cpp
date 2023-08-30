@@ -55,7 +55,10 @@ bool World::LoadLevel(std::string sLevelPath)
     std::cout << glm::to_string(vWorldSize) << std::endl;
 
     if (!ProcessLevel(vLevelStr))
+    {
+        std::cout << "ERROR: Failed to process level" << std::endl;
         return false;
+    }
 
     return true;
 }
@@ -64,6 +67,9 @@ bool World::LoadLevel(std::string sLevelPath)
 
 bool World::ProcessLevel(std::vector<std::string> vLevelStr)
 {
+    glm::ivec2 vKeyIndex;
+    glm::ivec2 vPortalIndex;
+
     cTileObj = std::make_unique<Object>("/res/tile.obj");
     for (int y = 0; y < vWorldSize.y; y++)
     {
@@ -79,6 +85,7 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
                     t.vCol = glm::vec3(0.2f, 0.2f, 0.5f);
                     t.eType = TileType::NORMAL;
                     t.bDebug = false;
+                    t.nID = nCurUUID++;
                     break;
                 }
 
@@ -87,19 +94,34 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
                     t.vCol = glm::vec3(0.5f, 0.2f, 0.2f);
                     t.eType = TileType::SOLID;
                     t.bDebug = false;
+                    t.nID = nCurUUID++;
                     break;
                 }
 
                 case '.':
                 {
+                    vPortalIndex = glm::ivec2(x, y);
                     t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
                     t.eType = TileType::PORTAL;
+                    t.nID = nCurUUID++;
                     t.bDebug = false;
+                    break;
+                }
+
+                case 'p':
+                {
+                    vKeyIndex = glm::ivec2(x, y);
+                    t.vCol = glm::vec3(0.0f, 0.5f, 0.5f);
+                    t.eType = TileType::PORTAL_KEY;
+                    t.bDebug = false;
+                    t.nID = nCurUUID++;
                     break;
                 }
 
                 default:
                 {
+                    std::cout << "Incorrect tile code: \"" << vLevelStr[x][y] << "\"" << std::endl;
+                    std::cout << "At position: (" << x << ", " << y << ")" << std::endl;
                     return false;
                     break;
                 }
@@ -108,6 +130,10 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
             vLevelTiles.push_back(t);
         }
     }
+
+    int32_t nKeyID = vLevelTiles[vPortalIndex.y * vWorldSize.x + vPortalIndex.x].nID;
+    if (nKeyID >= 0)
+        vLevelTiles[vKeyIndex.y * vWorldSize.x + vKeyIndex.x].nPortalKey = nKeyID;
 
     return true;
 }

@@ -42,7 +42,7 @@ void App::Create()
     GLFWConfig();
 
     pWorld = std::make_shared<World>();
-    if (!pWorld->LoadLevel("/res/map.lvl"))
+    if (!pWorld->LoadLevel("/res/level_01.lvl"))
         std::cout << "ERROR: Failed to load level" << std::endl;
 
     pPlayer = std::make_unique<Player>(pWorld, "/res/robot.obj");
@@ -69,6 +69,7 @@ void App::Update()
     ProcessInput();
     pPlayer->Update(fDeltaTime);
     Render();
+    PrintDebug();
 
     glfwSwapBuffers(pWindow);
     glfwPollEvents();
@@ -99,6 +100,22 @@ void App::Render()
 
     pWorld->Draw(cShader);
     pPlayer->Draw(cShader);
+}
+
+
+
+void App::PrintDebug()
+{
+    std::cout << "Keys obtained: " << pPlayer->vPortalKeys.size() << std::endl;
+    for (auto &key : pPlayer->vPortalKeys)
+        std::cout << "Key ID: " << key << std::endl;
+
+    for (auto &tile : pWorld->vLevelTiles)
+    {
+        if (tile.eType == TileType::PORTAL)
+            std::cout << "Portal ID: " << tile.nID << std::endl;
+    }
+
 }
 
 

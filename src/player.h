@@ -32,7 +32,13 @@ class Player : public Object
         glm::vec2 vRight = glm::vec2(0.0f, 1.0f);
         std::shared_ptr<World> pWorld;
 
+        std::vector<uint32_t> vPortalKeys;
+
 
     private:
         float fColliderRadius = 0.7f;
+
+
+    private:
+        bool CheckForIDMatch(TileInst &sTile);
 };
