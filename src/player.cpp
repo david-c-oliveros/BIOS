@@ -17,7 +17,9 @@ Player::~Player()
 
 void Player::Update(float fDeltaTime)
 {
+    vVel *= fSpeedScalar;
     Collisions(fDeltaTime);
+    vVel = glm::vec2(0.0f, 0.0f);
 }
 
 
@@ -117,5 +119,5 @@ void Player::ProcessMovement(EntityMovement eDir, float fDeltaTime)
         vVel -= vRight;
 
     if (glm::length(vVel) * glm::length(vVel) > 0)
-        vVel = glm::normalize(vVel) * 4.0f;
+        vVel = glm::normalize(vVel);
 }

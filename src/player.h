@@ -26,6 +26,7 @@ class Player : public Object
 
 
     public:
+        float fSpeedScalar = 4.0f;
         glm::vec2 vVel = glm::vec2(0.0f, 0.0f);
         glm::vec2 vFront = glm::vec2(1.0f, 0.0f);
         glm::vec2 vRight = glm::vec2(0.0f, 1.0f);

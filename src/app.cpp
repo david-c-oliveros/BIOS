@@ -143,7 +143,6 @@ void App::ProcessInput()
     if (aKeyStates[(size_t)KEYS::D])
         cCamera.ProcessKeyboard(Camera_Movement::RIGHT, 0.1, false);
 
-    pPlayer->vVel = glm::vec2(0.0f, 0.0f);
     if (aKeyStates[(size_t)KEYS::UP])
         pPlayer->ProcessMovement(EntityMovement::FORWARD, 0.1);
     if (aKeyStates[(size_t)KEYS::DOWN])
