@@ -63,7 +63,6 @@ void App::Create()
 void App::Update()
 {
     SetDeltaTime();
-    std::cout << "Frame time: " << fDeltaTime << std::endl;
     ProcessInput();
     pPlayer->Update(fDeltaTime);
     Render();

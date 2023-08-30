@@ -21,6 +21,7 @@ class Player : public Object
 
         void Update(float fDeltaTime);
         void Collisions(float fDeltaTime);
+        void DrawDebug(Shader &cShader);
         void ProcessMovement(EntityMovement dir, float fDeltaTime);
 
 

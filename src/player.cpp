@@ -25,8 +25,10 @@ void Player::Update(float fDeltaTime)
 void Player::Collisions(float fDeltaTime)
 {
     glm::vec2 vPlanarPos(vPos.x, vPos.z);
+    //std::cout << "Current pos: " << glm::to_string(vPos) << std::endl;
 
     glm::vec2 vPotentialPos = vPlanarPos + vVel * fDeltaTime;
+//    std::cout << "Potential pos: " << glm::to_string(vPotentialPos) << std::endl;
 
     glm::ivec2 vCurCell = glm::floor(vPlanarPos);
     glm::ivec2 vTargetCell = vPotentialPos;
@@ -53,8 +55,19 @@ void Player::Collisions(float fDeltaTime)
             {
                 pWorld->vTiles[vCell.x * pWorld->vWorldSize.y + vCell.y].vCol = glm::vec3(0.5f, 0.2f, 0.2f);
                 glm::vec2 vNearestPoint;
-                vNearestPoint.x = std::max(float(vCell.x), std::min(vPotentialPos.x, float(vCell.x + 1)));
-                vNearestPoint.y = std::max(float(vCell.y), std::min(vPotentialPos.y, float(vCell.y + 1)));
+
+                /************************************************************************************************************/
+                /*                                                                                                          */
+                /*        This is the original algorithm from Javidx9, which, in my implementation,                         */
+                /*        caused current solid cell plus next three to be "solid":                                           */
+                /*        vNearestPoint.x = std::max(float(vCell.x), std::min(vPotentialPos.x, float(vCell.x + 1)));        */
+                /*        vNearestPoint.y = std::max(float(vCell.y), std::min(vPotentialPos.y, float(vCell.y + 1)));        */
+                /*        Below is my updated version, which works, but I'm not sure why, which troubles me                 */
+                /*                                                                                                          */
+                /************************************************************************************************************/
+
+                vNearestPoint.x = std::max(float(vCell.x), std::min(vPotentialPos.x, float(vCell.x)));
+                vNearestPoint.y = std::max(float(vCell.y), std::min(vPotentialPos.y, float(vCell.y)));
 
                 glm::vec2 vRayToNearest = vNearestPoint - vPotentialPos;
                 float fOverlap = fColliderRadius - glm::length(vRayToNearest);

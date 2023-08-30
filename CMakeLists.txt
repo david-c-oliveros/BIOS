@@ -28,7 +28,8 @@ add_executable(${PROJECT_NAME}
 #add_subdirectory(external/glfw)
 add_subdirectory(external/assimp)
 
-include_directories(external/glfw/include)
+include_directories(
+    external/glfw/include)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC external/glad

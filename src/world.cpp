@@ -14,7 +14,7 @@ World::World(glm::ivec2 _vWorldSize)
             TileInst t;
             t.vPos = glm::vec3(i, 0, j);
 
-            if (i % 2 == 0 && j % 2 == 0)
+            if (i % 3 == 0 && j % 3 == 0)
             {
                 t.vCol = glm::vec3(0.5f, 0.2f, 0.2f);
                 t.bSolid = true;
