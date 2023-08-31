@@ -4,6 +4,7 @@
 
 World::World()
 {
+    cTileObj = std::make_unique<Object>("/res/debug_tile.obj");
 }
 
 
@@ -18,11 +19,31 @@ void World::Draw(Shader &cShader)
 {
     for (auto &tile : vLevelTiles)
     {
+        //cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
         cTileObj->vPos = tile.vPos;
         cTileObj->vCol = tile.vCol;
         if (tile.bDebug)
             cTileObj->vCol = glm::vec3(0.0f, 0.5f, 0.0f);
         cTileObj->Draw(cShader);
+    }
+}
+
+
+
+void World::GenDebugWorld()
+{
+    vWorldSize = glm::ivec2(16, 16);
+    for (int y = 0; y < vWorldSize.y; y++)
+    {
+        for (int x = 0; x < vWorldSize.x; x++)
+        {
+            TileInst t;
+            t.vPos = glm::ivec3(x, 0, y);
+            t.vCol = glm::ivec3(0.2f, 0.2f, 0.5f);
+            t.bDebug = false;
+
+            vLevelTiles.push_back(t);
+        }
     }
 }
 
@@ -70,7 +91,6 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
     glm::ivec2 vKeyIndex;
     glm::ivec2 vPortalIndex;
 
-    cTileObj = std::make_unique<Object>("/res/tile.obj");
     for (int y = 0; y < vWorldSize.y; y++)
     {
         for (int x = 0; x < vWorldSize.x; x++)

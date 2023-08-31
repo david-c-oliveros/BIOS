@@ -40,7 +40,7 @@ class Player : public Object
 
     private:
         float fHeightOffset = 0.4f;
-        float fColliderRadius = 0.9f;
+        float fColliderRadius = 0.2f;
 
 
     private:

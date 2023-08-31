@@ -27,6 +27,12 @@ void Player::Update(float fDeltaTime)
 
 void Player::Collisions(float fDeltaTime)
 {
+
+    /****************************************/
+    /*                                      */
+    /*        Algorithm from Javidx9        */
+    /*                                      */
+    /****************************************/
     glm::vec2 vPlanarPos(vPos.x, vPos.z);
 
     glm::vec2 vPotentialPos = vPlanarPos + vVel * fDeltaTime;
@@ -55,23 +61,13 @@ void Player::Collisions(float fDeltaTime)
                 break;
 
             int nCurIndex = vCell.y * pWorld->vWorldSize.x + vCell.x;
+
             if (pWorld->vLevelTiles[nCurIndex].eType == TileType::SOLID)
             {
-                pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.5f, 0.2f, 0.2f);
                 glm::vec2 vNearestPoint;
 
-                /************************************************************************************************************/
-                /*                                                                                                          */
-                /*        This is the original algorithm from Javidx9, which, in my implementation,                         */
-                /*        caused current solid cell plus next three to be "solid":                                           */
-                /*        vNearestPoint.x = std::max(float(vCell.x), std::min(vPotentialPos.x, float(vCell.x + 1)));        */
-                /*        vNearestPoint.y = std::max(float(vCell.y), std::min(vPotentialPos.y, float(vCell.y + 1)));        */
-                /*        Below is my updated version, which works, but I'm not sure why, which troubles me                 */
-                /*                                                                                                          */
-                /************************************************************************************************************/
-
-                vNearestPoint.x = std::max(float(vCell.x), std::min(vPotentialPos.x, float(vCell.x)));
-                vNearestPoint.y = std::max(float(vCell.y), std::min(vPotentialPos.y, float(vCell.y)));
+                vNearestPoint.x = std::max(float(vCell.x), std::min(vPotentialPos.x, float(vCell.x + 1)));
+                vNearestPoint.y = std::max(float(vCell.y), std::min(vPotentialPos.y, float(vCell.y + 1)));
 
                 glm::vec2 vRayToNearest = vNearestPoint - vPotentialPos;
                 float fOverlap = fColliderRadius - glm::length(vRayToNearest);
@@ -103,6 +99,8 @@ void Player::Collisions(float fDeltaTime)
         }
     }
 
+    pWorld->vLevelTiles[vCurCell.y * pWorld->vWorldSize.x + vCurCell.x].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
+
     vPos.x = vPotentialPos.x;
     vPos.z = vPotentialPos.y;
 }
@@ -114,17 +112,21 @@ void Player::CheckForSpecialTiles()
     /*****************************************************/
     /*        TODO - Fix error with tile position        */
     /*****************************************************/
-    int nCurTile = (int)vPos.z * pWorld->vWorldSize.x + (int)vPos.x;
-    if (pWorld->vLevelTiles[nCurTile].eType == TileType::PORTAL_KEY)
+    glm::vec2 vPlanarPos = glm::vec2(vPos.x, vPos.z);
+    glm::vec2 vCurTile = glm::floor(vPlanarPos);
+
+    int idx = vCurTile.y * pWorld->vWorldSize.x + vCurTile.x;
+
+    if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL_KEY)
     {
-        pWorld->vLevelTiles[nCurTile].eType = TileType::NORMAL;
-        vPortalKeys.push_back(pWorld->vLevelTiles[nCurTile].nPortalKey);
+        pWorld->vLevelTiles[idx].eType = TileType::NORMAL;
+        vPortalKeys.push_back(pWorld->vLevelTiles[idx].nPortalKey);
     }
-    else if (pWorld->vLevelTiles[nCurTile].eType == TileType::PORTAL)
+    else if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL)
     {
         // Check if we have a Portal Key with an id that matches
         // that of the Portal, and if so, load into new level
-        if (CheckForIDMatch(pWorld->vLevelTiles[nCurTile]))
+        if (CheckForIDMatch(pWorld->vLevelTiles[idx]))
         {
             pWorld->UnloadLevel();
             pWorld->LoadLevel("/res/level_02.lvl");
@@ -134,8 +136,15 @@ void Player::CheckForSpecialTiles()
         {
             std::cout << "Locked! You must find the pointer to the next memory block" << std::endl;
         }
-        pWorld->vLevelTiles[nCurTile].vCol = glm::vec3(0.0f, 0.5f, 0.5f);
+        pWorld->vLevelTiles[idx].vCol = glm::vec3(0.0f, 0.5f, 0.5f);
     }
+    else
+    {
+        pWorld->vLevelTiles[idx].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
+    }
+    pWorld->vLevelTiles[idx].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
+
+    pWorld->vLevelTiles[0].vCol = glm::vec3(0.0f);
 }
 
 

@@ -45,6 +45,9 @@ void App::Create()
     if (!pWorld->LoadLevel("/res/level_01.lvl"))
         std::cout << "ERROR: Failed to load level" << std::endl;
 
+    pCube = std::make_unique<Object>("/res/cube.obj");
+    pCube->vPos = glm::vec3(0.0f, 0.0f, 0.0f);
+
     pPlayer = std::make_unique<Player>(pWorld, "/res/robot.obj");
     pPlayer->vPos = glm::vec3(8.5f, 0.4f, 8.5f);
     pPlayer->vCol = glm::vec3(0.3f, 0.3f, 0.45f);
@@ -100,6 +103,14 @@ void App::Render()
 
     pWorld->Draw(cShader);
     pPlayer->Draw(cShader);
+    for (int y = 0; y < pWorld->vWorldSize.y; y++)
+    {
+        for (int x = 0; x < pWorld->vWorldSize.x; x++)
+        {
+            pCube->vPos = glm::vec3(x, 0.0f, y);
+            pCube->Draw(cShader);
+        }
+    }
 }
 
 
@@ -155,22 +166,22 @@ void App::GLFWConfig()
 void App::ProcessInput()
 {
     if (aKeyStates[(size_t)KEYS::W])
-        cCamera.ProcessKeyboard(Camera_Movement::FORWARD, 0.1, false);
+        cCamera.ProcessKeyboard(Camera_Movement::FORWARD, fDeltaTime, false);
     if (aKeyStates[(size_t)KEYS::S])
-        cCamera.ProcessKeyboard(Camera_Movement::BACKWARD, 0.1, false);
+        cCamera.ProcessKeyboard(Camera_Movement::BACKWARD, fDeltaTime, false);
     if (aKeyStates[(size_t)KEYS::A])
-        cCamera.ProcessKeyboard(Camera_Movement::LEFT, 0.1, false);
+        cCamera.ProcessKeyboard(Camera_Movement::LEFT, fDeltaTime, false);
     if (aKeyStates[(size_t)KEYS::D])
-        cCamera.ProcessKeyboard(Camera_Movement::RIGHT, 0.1, false);
+        cCamera.ProcessKeyboard(Camera_Movement::RIGHT, fDeltaTime, false);
 
     if (aKeyStates[(size_t)KEYS::UP])
-        pPlayer->ProcessMovement(EntityMovement::FORWARD, 0.1);
+        pPlayer->ProcessMovement(EntityMovement::FORWARD, fDeltaTime);
     if (aKeyStates[(size_t)KEYS::DOWN])
-        pPlayer->ProcessMovement(EntityMovement::BACKWARD, 0.1);
+        pPlayer->ProcessMovement(EntityMovement::BACKWARD, fDeltaTime);
     if (aKeyStates[(size_t)KEYS::LEFT])
-        pPlayer->ProcessMovement(EntityMovement::LEFT, 0.1);
+        pPlayer->ProcessMovement(EntityMovement::LEFT, fDeltaTime);
     if (aKeyStates[(size_t)KEYS::RIGHT])
-        pPlayer->ProcessMovement(EntityMovement::RIGHT, 0.1);
+        pPlayer->ProcessMovement(EntityMovement::RIGHT, fDeltaTime);
 }
 
 

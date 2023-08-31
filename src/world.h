@@ -40,6 +40,7 @@ class World
         World();
         ~World();
 
+        void GenDebugWorld();
         void Draw(Shader &cShader);
         bool LoadLevel(std::string sPath);
         void UnloadLevel();
