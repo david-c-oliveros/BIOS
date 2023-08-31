@@ -68,8 +68,8 @@ void App::Update()
     SetDeltaTime();
     ProcessInput();
     pPlayer->Update(fDeltaTime);
+    cCamera.UpdateFollow(pPlayer->vPos, fDeltaTime);
     Render();
-    PrintDebug();
 
     glfwSwapBuffers(pWindow);
     glfwPollEvents();

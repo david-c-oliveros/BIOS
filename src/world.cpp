@@ -78,7 +78,7 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
             TileInst t;
             t.vPos = glm::vec3(x, 0, y);
 
-            switch(vLevelStr[x][y])
+            switch(vLevelStr[y][x])
             {
                 case '=':
                 {
@@ -98,7 +98,17 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
                     break;
                 }
 
-                case '.':
+                case 'i':
+                {
+                    vPortalIndex = glm::ivec2(x, y);
+                    t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
+                    t.eType = TileType::SPAWN;
+                    t.nID = nCurUUID++;
+                    t.bDebug = false;
+                    break;
+                }
+
+                case 'o':
                 {
                     vPortalIndex = glm::ivec2(x, y);
                     t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -136,4 +146,24 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
         vLevelTiles[vKeyIndex.y * vWorldSize.x + vKeyIndex.x].nPortalKey = nKeyID;
 
     return true;
+}
+
+
+
+void World::UnloadLevel()
+{
+    vLevelTiles.clear();
+}
+
+
+
+glm::ivec3 World::GetSpawnLoc()
+{
+    for (auto tile : vLevelTiles)
+    {
+        if (tile.eType == TileType::SPAWN)
+            return tile.vPos;
+    }
+
+    return glm::ivec3(-1, 0, -1);
 }

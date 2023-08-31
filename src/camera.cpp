@@ -102,6 +102,14 @@ void Camera::UpdateCameraVectors()
 
 
 
+void Camera::UpdateFollow(glm::vec3 vFollowPos, float fDeltaTime)
+{
+    vPos.x = glm::mix(vPos.x, vFollowPos.x - 4.0f, fDeltaTime * 4.0f);
+    vPos.z = glm::mix(vPos.z, vFollowPos.z - 4.0f, fDeltaTime * 4.0f);
+}
+
+
+
 void Camera::PrintvPos()
 {
     std::cout << "(" << vPos.x << ", " << vPos.y << ", " << vPos.z << ")" << std::endl;

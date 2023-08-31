@@ -60,9 +60,9 @@ class Camera
         void ProcessKeyboard(Camera_Movement direction, float deltaTime, bool bDebug);
         void ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConstrainPitch = true);
         void ProcessMouseScroll(float yoffset);
+        void UpdateFollow(glm::vec3 vFollowPos, float fDeltaTime);
 
         void PrintvPos();
-        void SetPosVel(glm::vec3 newPos);
 
     private:
         void UpdateCameraVectors();

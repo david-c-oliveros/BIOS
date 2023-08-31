@@ -19,6 +19,7 @@ void Player::Update(float fDeltaTime)
 {
     vVel *= fSpeedScalar;
     Collisions(fDeltaTime);
+    CheckForSpecialTiles();
     vVel = glm::vec2(0.0f, 0.0f);
 }
 
@@ -97,20 +98,6 @@ void Player::Collisions(float fDeltaTime)
                     vPotentialPos = vPotentialPos - vNorm * fOverlap;
                 }
             }
-            else if (pWorld->vLevelTiles[nCurIndex].eType == TileType::PORTAL_KEY)
-            {
-                pWorld->vLevelTiles[nCurIndex].eType = TileType::NORMAL;
-                vPortalKeys.push_back(pWorld->vLevelTiles[nCurIndex].nPortalKey);
-            }
-            else if (pWorld->vLevelTiles[nCurIndex].eType == TileType::PORTAL)
-            {
-                // Check if we have a Portal Key with an id that matches
-                // that of the Portal, and if so, load into new level
-                if (CheckForIDMatch(pWorld->vLevelTiles[nCurIndex]))
-                    std::cout << "Time to load new level!" << std::endl;
-                else
-                    std::cout << "Locked! You must find the pointer to the next memory block" << std::endl;
-            }
             else
                 pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.0f, 0.5f, 0.0f);
         }
@@ -118,6 +105,37 @@ void Player::Collisions(float fDeltaTime)
 
     vPos.x = vPotentialPos.x;
     vPos.z = vPotentialPos.y;
+}
+
+
+
+void Player::CheckForSpecialTiles()
+{
+    /*****************************************************/
+    /*        TODO - Fix error with tile position        */
+    /*****************************************************/
+    int nCurTile = (int)vPos.z * pWorld->vWorldSize.x + (int)vPos.x;
+    if (pWorld->vLevelTiles[nCurTile].eType == TileType::PORTAL_KEY)
+    {
+        pWorld->vLevelTiles[nCurTile].eType = TileType::NORMAL;
+        vPortalKeys.push_back(pWorld->vLevelTiles[nCurTile].nPortalKey);
+    }
+    else if (pWorld->vLevelTiles[nCurTile].eType == TileType::PORTAL)
+    {
+        // Check if we have a Portal Key with an id that matches
+        // that of the Portal, and if so, load into new level
+        if (CheckForIDMatch(pWorld->vLevelTiles[nCurTile]))
+        {
+            pWorld->UnloadLevel();
+            pWorld->LoadLevel("/res/level_02.lvl");
+            Spawn(pWorld->GetSpawnLoc());
+        }
+        else
+        {
+            std::cout << "Locked! You must find the pointer to the next memory block" << std::endl;
+        }
+        pWorld->vLevelTiles[nCurTile].vCol = glm::vec3(0.0f, 0.5f, 0.5f);
+    }
 }
 
 
@@ -148,4 +166,19 @@ bool Player::CheckForIDMatch(TileInst &sTile)
     }
 
     return false;
+}
+
+
+
+void Player::Spawn(glm::vec3 vNewPos)
+{
+    vPos = vNewPos;
+}
+
+
+
+void Player::Draw(Shader &cShader)
+{
+    vPos.y = fHeightOffset;
+    Object::Draw(cShader);
 }

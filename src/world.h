@@ -16,6 +16,7 @@ enum class TileType
     NORMAL,
     SOLID,
     PORTAL,
+    SPAWN,
     PORTAL_KEY
 };
 
@@ -41,6 +42,8 @@ class World
 
         void Draw(Shader &cShader);
         bool LoadLevel(std::string sPath);
+        void UnloadLevel();
+        glm::ivec3 GetSpawnLoc();
 
 
     public:

@@ -22,7 +22,10 @@ class Player : public Object
         void Update(float fDeltaTime);
         void Collisions(float fDeltaTime);
         void DrawDebug(Shader &cShader);
+        void CheckForSpecialTiles();
         void ProcessMovement(EntityMovement dir, float fDeltaTime);
+        void Spawn(glm::vec3 vNewPos);
+        void Draw(Shader &cShader);
 
 
     public:
@@ -36,7 +39,8 @@ class Player : public Object
 
 
     private:
-        float fColliderRadius = 0.7f;
+        float fHeightOffset = 0.4f;
+        float fColliderRadius = 0.9f;
 
 
     private:
