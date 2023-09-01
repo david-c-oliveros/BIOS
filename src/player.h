@@ -25,10 +25,10 @@ class Player : public Object
         Player(std::shared_ptr<World> _pWorld, std::string _sPath, glm::vec3 _vPos = glm::vec3(0.0f), float _fRotAngle = 0.0f);
         ~Player();
 
-        void Update(float fDeltaTime);
+        void Update(float fDeltaTime, Shader &cShader);
         void Collisions(float fDeltaTime);
         void DrawDebug(Shader &cShader);
-        void CheckForSpecialTiles();
+        void CheckForSpecialTiles(Shader &cShader);
         void ProcessMovement(EntityMovement dir, float fDeltaTime);
         void Spawn(glm::vec3 vNewPos);
         void Draw(Shader &cShader);

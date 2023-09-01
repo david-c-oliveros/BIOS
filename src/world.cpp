@@ -29,6 +29,7 @@ void World::Draw(Shader &cShader)
             {
                 cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
                 cTileObj->vCol = tile.vCol;
+                cTileObj->fShininess = 8.0f;
                 cTileObj->Draw(cShader);
                 break;
             }
@@ -37,6 +38,7 @@ void World::Draw(Shader &cShader)
             {
                 cWallObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
                 cWallObj->vCol = tile.vCol;
+                cWallObj->fShininess = 32.0f;
                 cWallObj->Draw(cShader);
                 break;
             }
@@ -45,6 +47,7 @@ void World::Draw(Shader &cShader)
             {
                 cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
                 cTileObj->vCol = tile.vCol;
+                cTileObj->fShininess = 4.0f;
                 cTileObj->Draw(cShader);
                 break;
             }
@@ -73,7 +76,7 @@ void World::GenDebugWorld()
 
 
 
-bool World::LoadLevel(std::string sLevelPath)
+bool World::LoadLevel(std::string sLevelPath, Shader &cShader)
 {
     std::ifstream fin;
     if (std::filesystem::exists(sLevelPath))
@@ -99,7 +102,7 @@ bool World::LoadLevel(std::string sLevelPath)
 
     std::cout << glm::to_string(vWorldSize) << std::endl;
 
-    if (!ProcessLevel(vLevelStr))
+    if (!ProcessLevel(vLevelStr, cShader))
     {
         std::cout << "ERROR: Failed to process level" << std::endl;
         return false;
@@ -110,7 +113,7 @@ bool World::LoadLevel(std::string sLevelPath)
 
 
 
-bool World::ProcessLevel(std::vector<std::string> vLevelStr)
+bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 {
     glm::ivec2 vKeyIndex;
     glm::ivec2 vPortalIndex;
@@ -169,6 +172,7 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr)
                     t.eType = TileType::PORTAL_KEY;
                     t.bDebug = false;
                     t.nID = nCurUUID++;
+                    cShader.SetVec3("sKeyLight.position", glm::vec3(t.vPos) + glm::vec3(0.5f, 0.0f, 0.5f));
                     break;
                 }
 

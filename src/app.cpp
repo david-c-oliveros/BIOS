@@ -41,8 +41,10 @@ void App::Create()
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, glContext, attrs);
     GLFWConfig();
 
+    LoadShaders();
+
     pWorld = std::make_shared<World>();
-    if (!pWorld->LoadLevel("/res/level_01.lvl"))
+    if (!pWorld->LoadLevel("/res/level_01.lvl", cShader))
         std::cout << "ERROR: Failed to load level" << std::endl;
 
     pCube = std::make_unique<Object>("/res/cube.obj");
@@ -57,8 +59,6 @@ void App::Create()
     {
         aKeyStates[i] = false;
     }
-
-    LoadShaders();
 }
 
 
@@ -70,7 +70,7 @@ void App::Update()
 {
     SetDeltaTime();
     ProcessInput();
-    pPlayer->Update(fDeltaTime);
+    pPlayer->Update(fDeltaTime, cShader);
     cCamera.OrbitFollow(pPlayer, fDeltaTime);
     Render();
 
@@ -101,6 +101,7 @@ void App::Render()
     cShader.SetMat4("mProjection", mProjection);
     cShader.SetVec3("vViewPos", cCamera.vPos);
     cShader.SetVec3("vPlayerPos", pPlayer->vPos);
+    cShader.SetVec3("sPlayerLight.position", pPlayer->vPos);
 
     pWorld->Draw(cShader);
     pPlayer->Draw(cShader);
@@ -132,13 +133,34 @@ void App::LoadShaders()
     cShader.SetVec3("sMaterial.diffuse", glm::vec3(0.5f, 0.0f, 0.0f));
     cShader.SetVec3("sMaterial.specular", glm::vec3(0.5f, 0.0f, 0.0f));
     cShader.SetFloat("sMaterial.shininess", 32.0f);
+
+
     cShader.SetVec3("sDirLight.direction", glm::vec3(0.5f, -0.5f, -0.1f));
-    cShader.SetVec3("sDirLight.ambient", glm::vec3(0.4f, 0.4f, 0.4f));
-    cShader.SetVec3("sDirLight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    cShader.SetVec3("sDirLight.ambient", glm::vec3(0.8f, 0.8f, 0.8f));
+    cShader.SetVec3("sDirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+    cShader.SetVec3("sDirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
     cShader.SetVec3("sDirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-    cShader.SetBool("bHasTexture", true);
-    cShader.SetVec3("vColor", glm::vec3(0.2f, 0.1f, 0.1f));
+
+    cShader.SetVec3("sPlayerLight.position", glm::vec3(0.0f, 0.0f, 0.0f));
+    cShader.SetVec3("sPlayerLight.ambient", glm::vec3(0.04f, 0.04f, 0.04f));
+    cShader.SetVec3("sPlayerLight.diffuse", glm::vec3(0.1f, 0.1f, 0.1f));
+    cShader.SetVec3("sPlayerLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+    cShader.SetFloat("sPlayerLight.constant", 0.2f);
+    cShader.SetFloat("sPlayerLight.linear", 0.04f);
+    cShader.SetFloat("sPlayerLight.quadratic", 0.064f);
+
+    cShader.SetVec3("sKeyLight.position", glm::vec3(8.0f, 0.0f, 8.0f));
+    cShader.SetVec3("sKeyLight.ambient", glm::vec3(0.04f, 0.04f, 0.04f));
+    cShader.SetVec3("sKeyLight.diffuse", glm::vec3(0.1f, 0.1f, 0.1f));
+    cShader.SetVec3("sKeyLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+    cShader.SetFloat("sKeyLight.constant", 0.02f);
+    cShader.SetFloat("sKeyLight.linear", 0.04f);
+    cShader.SetFloat("sKeyLight.quadratic", 0.064f);
+    cShader.SetBool("bOn", true);
+
+
     cShader.SetVec3("vFogColor", vFogColor);
+
 }
 
 

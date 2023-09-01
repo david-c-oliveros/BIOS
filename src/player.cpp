@@ -15,11 +15,11 @@ Player::~Player()
 
 
 
-void Player::Update(float fDeltaTime)
+void Player::Update(float fDeltaTime, Shader &cShader)
 {
     vVel += vImpulse;
     Collisions(fDeltaTime);
-    CheckForSpecialTiles();
+    CheckForSpecialTiles(cShader);
     vVel = glm::vec2(0.0f, 0.0f);
     vImpulse *= fFriction;
 }
@@ -111,7 +111,7 @@ void Player::Collisions(float fDeltaTime)
 
 
 
-void Player::CheckForSpecialTiles()
+void Player::CheckForSpecialTiles(Shader &cShader)
 {
     glm::vec2 vPlanarPos = glm::vec2(vPos.x, vPos.z);
     glm::vec2 vCurTile = glm::floor(vPlanarPos);
@@ -122,6 +122,7 @@ void Player::CheckForSpecialTiles()
     {
         pWorld->vLevelTiles[idx].eType = TileType::NORMAL;
         pWorld->vLevelTiles[idx].vCol = glm::vec3(0.2f, 0.2f, 0.5f);
+        cShader.SetBool("bOn", false);
         vPortalKeys.push_back(pWorld->vLevelTiles[idx].nPortalKey);
     }
     else if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL)
@@ -131,7 +132,7 @@ void Player::CheckForSpecialTiles()
         if (CheckForIDMatch(pWorld->vLevelTiles[idx]))
         {
             pWorld->UnloadLevel();
-            pWorld->LoadLevel("/res/level_02.lvl");
+            pWorld->LoadLevel("/res/level_02.lvl", cShader);
             Spawn(pWorld->GetSpawnLoc());
         }
         else

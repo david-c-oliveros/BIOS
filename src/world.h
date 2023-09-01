@@ -42,7 +42,7 @@ class World
 
         void GenDebugWorld();
         void Draw(Shader &cShader);
-        bool LoadLevel(std::string sPath);
+        bool LoadLevel(std::string sPath, Shader &cShader);
         void UnloadLevel();
         glm::ivec3 GetSpawnLoc();
 
@@ -60,5 +60,5 @@ class World
 
 
     private:
-        bool ProcessLevel(std::vector<std::string> vvLevelStr);
+        bool ProcessLevel(std::vector<std::string> vvLevelStr, Shader &cShader);
 };
