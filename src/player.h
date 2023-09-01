@@ -33,6 +33,7 @@ class Player : public Object
         void Spawn(glm::vec3 vNewPos);
         void Draw(Shader &cShader);
         void UpdateVectors();
+        void Orbit(glm::vec3 vTarget);
 
 
     public:
@@ -47,7 +48,7 @@ class Player : public Object
     private:
         float fHeightOffset = 0.4f;
         float fColliderRadius = 0.2f;
-        float fRotSpeed = 256.0f;
+        float fRotSpeed = 128.0f;
         float fSpeedScalar = 16.0f;
 
         glm::vec2 vImpulse = glm::vec2(0.0f, 0.0f);

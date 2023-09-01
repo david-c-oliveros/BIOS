@@ -71,7 +71,7 @@ void App::Update()
     SetDeltaTime();
     ProcessInput();
     pPlayer->Update(fDeltaTime);
-    cCamera.UpdateFollow(pPlayer->vPos, fDeltaTime);
+    cCamera.UpdateFollow(pPlayer, fDeltaTime);
     Render();
 
     glfwSwapBuffers(pWindow);
@@ -166,13 +166,13 @@ void App::ProcessInput()
     if (aKeyStates[(size_t)KEYS::D])
         cCamera.ProcessKeyboard(Camera_Movement::RIGHT, fDeltaTime, false);
 
-    if (aKeyStates[(size_t)KEYS::UP])
+    if (aKeyStates[(size_t)KEYS::W])
         pPlayer->ProcessMovement(EntityMovement::FORWARD, fDeltaTime);
-    if (aKeyStates[(size_t)KEYS::DOWN])
+    if (aKeyStates[(size_t)KEYS::S])
         pPlayer->ProcessMovement(EntityMovement::BACKWARD, fDeltaTime);
-    if (aKeyStates[(size_t)KEYS::LEFT])
+    if (aKeyStates[(size_t)KEYS::A])
         pPlayer->ProcessMovement(EntityMovement::LEFT, fDeltaTime);
-    if (aKeyStates[(size_t)KEYS::RIGHT])
+    if (aKeyStates[(size_t)KEYS::D])
         pPlayer->ProcessMovement(EntityMovement::RIGHT, fDeltaTime);
 }
 
@@ -190,7 +190,7 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
     if (eventType != EMSCRIPTEN_EVENT_MOUSEMOVE)
         return 0;
 
-    cCamera.ProcessMouseMovement(e->movementX, -e->movementY);
+//    cCamera.ProcessMouseMovement(e->movementX, -e->movementY);
 
     return 0;
 }

@@ -80,7 +80,7 @@ class App
         Shader cShader;
 
         std::shared_ptr<World> pWorld;
-        std::unique_ptr<Player> pPlayer;
+        std::shared_ptr<Player> pPlayer;
         std::unique_ptr<Object> pCube;
 
         GLuint shader;

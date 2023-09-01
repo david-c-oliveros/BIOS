@@ -2,7 +2,7 @@
 
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), fMovementSpeed(WALK_SPEED), fSprintSpeed(SPRINT_SPEED),
+    : vFront(glm::vec3(0.0f, 0.0f, -1.0f)), fMovementSpeed(WALK_SPEED), fSprintSpeed(SPRINT_SPEED),
       fMouseSensitivity(SENSITIVITY), fZoom(ZOOM), bSprint(false), bConstrainToFloor(true)
 {
     vPos = position;
@@ -17,7 +17,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 
 
 Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch)
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), fMovementSpeed(WALK_SPEED), fSprintSpeed(SPRINT_SPEED),
+    : vFront(glm::vec3(0.0f, 0.0f, -1.0f)), fMovementSpeed(WALK_SPEED), fSprintSpeed(SPRINT_SPEED),
       fMouseSensitivity(SENSITIVITY), fZoom(ZOOM), bSprint(false), bConstrainToFloor(true)
 {
     vPos = glm::vec3(posX, posY, posZ);
@@ -33,7 +33,8 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 glm::mat4 Camera::GetViewMatrix()
 {
-    return glm::lookAt(vPos, vPos + Front, Up);
+    //return glm::lookAt(vPos, vPos + vFront, vUp);
+    return mView;
 }
 
 
@@ -44,13 +45,13 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime, bool bD
         totalSpeed *= 4;
 
     if (direction == FORWARD)
-        vPos += Front * totalSpeed;
+        vPos += vFront * totalSpeed;
     if (direction == BACKWARD)
-        vPos += -Front * totalSpeed;
+        vPos += -vFront * totalSpeed;
     if (direction == LEFT)
-        vPos += -Right * totalSpeed;
+        vPos += -vRight * totalSpeed;
     if (direction == RIGHT)
-        vPos += Right * totalSpeed;
+        vPos += vRight * totalSpeed;
 
     if (bConstrainToFloor && !bDebug)
         vNextPos.y = fFloor;
@@ -77,6 +78,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConst
 }
 
 
+
 void Camera::ProcessMouseScroll(float yoffset)
 {
     fZoom -= (float)yoffset;
@@ -88,24 +90,50 @@ void Camera::ProcessMouseScroll(float yoffset)
 }
 
 
+
+void Camera::Orbit(std::shared_ptr<Object> vTarget, float fDeltaTime)
+{
+    float dist = glm::distance(vPos, vTarget->vPos);
+    glm::mat4 R = glm::yawPitchRoll(glm::radians(fYaw), 0.0f, 0.0f);
+
+    glm::vec3 T = glm::vec3(-4.0f, dist, 0);
+    T = glm::vec3(R * glm::vec4(T, 0.0f));
+    glm::vec3 vNewPos = vTarget->vPos + T;
+    vPos.x = glm::mix(vPos.x, vNewPos.x, fDeltaTime);
+    vPos.y = glm::mix(vPos.y, 5.0f, fDeltaTime);
+    vPos.z = glm::mix(vPos.z, vNewPos.z, fDeltaTime);
+    vFront = glm::normalize(vTarget->vPos - vPos);
+
+    vUp = glm::vec3(R * glm::vec4(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f));
+    vRight = glm::cross(vFront, vUp);
+    mView = glm::lookAt(vPos, vTarget->vPos, vUp);
+}
+
+
+
 void Camera::UpdateCameraVectors()
 {
     glm::vec3 front;
     front.x = cos(glm::radians(fYaw)) * cos(glm::radians(fPitch));
     front.y = sin(glm::radians(fPitch));
     front.z = sin(glm::radians(fYaw)) * cos(glm::radians(fPitch));
-    Front = glm::normalize(front);
+    vFront = glm::normalize(front);
 
-    Right = glm::normalize(glm::cross(Front, WorldUp));
-    Up    = glm::normalize(glm::cross(Right, Front));
+    vRight = glm::normalize(glm::cross(vFront, WorldUp));
+    vUp    = glm::normalize(glm::cross(vRight, vFront));
 }
 
 
 
-void Camera::UpdateFollow(glm::vec3 vFollowPos, float fDeltaTime)
+void Camera::UpdateFollow(std::shared_ptr<Object> vFollowTarget, float fDeltaTime)
 {
-    vPos.x = glm::mix(vPos.x, vFollowPos.x - 4.0f, fDeltaTime * 4.0f);
-    vPos.z = glm::mix(vPos.z, vFollowPos.z, fDeltaTime * 4.0f);
+//    vPos.x = glm::mix(vPos.x, vFollowTarget->vPos.x - 4.0f, fDeltaTime * 4.0f);
+//    vPos.y = glm::max(vPos.y, 5.0f);
+//    vPos.z = glm::mix(vPos.z, vFollowTarget->vPos.z + 4.0f, fDeltaTime * 4.0f);
+
+    fYaw = vFollowTarget->fRotAngle;
+
+    Orbit(vFollowTarget, fDeltaTime);
 }
 
 

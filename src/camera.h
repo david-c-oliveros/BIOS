@@ -7,9 +7,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <vector>
+
+#include "object.h"
 
 
 enum Camera_Movement
@@ -36,10 +39,11 @@ class Camera
         glm::vec3 vPos;
         glm::vec3 vNextPos;
         glm::vec3 vVel;
-        glm::vec3 Front;
-        glm::vec3 Up;
-        glm::vec3 Right;
+        glm::vec3 vFront;
+        glm::vec3 vUp;
+        glm::vec3 vRight;
         glm::vec3 WorldUp;
+        glm::mat4 mView;
 
         float fYaw;
         float fPitch;
@@ -60,7 +64,8 @@ class Camera
         void ProcessKeyboard(Camera_Movement direction, float deltaTime, bool bDebug);
         void ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConstrainPitch = true);
         void ProcessMouseScroll(float yoffset);
-        void UpdateFollow(glm::vec3 vFollowPos, float fDeltaTime);
+        void Orbit(std::shared_ptr<Object> vTarget, float fDeltaTime);
+        void UpdateFollow(std::shared_ptr<Object> vFollowTarget, float fDeltaTime);
 
         void PrintvPos();
 
