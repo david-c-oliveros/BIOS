@@ -103,14 +103,6 @@ void App::Render()
 
     pWorld->Draw(cShader);
     pPlayer->Draw(cShader);
-    for (int y = 0; y < pWorld->vWorldSize.y; y++)
-    {
-        for (int x = 0; x < pWorld->vWorldSize.x; x++)
-        {
-            pCube->vPos = glm::vec3(x, 0.0f, y);
-            pCube->Draw(cShader);
-        }
-    }
 }
 
 

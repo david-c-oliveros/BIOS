@@ -17,8 +17,8 @@ Object::Object(std::string _sPath, glm::vec3 _vPos, float _fRotAngle)
 void Object::Draw(Shader &cShader)
 {
     glm::mat4 mModel = glm::mat4(1.0f);
-    mModel = glm::rotate(mModel, glm::radians(fRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     mModel = glm::translate(mModel, vPos);
+    mModel = glm::rotate(mModel, glm::radians(fRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
     cShader.Use();
     cShader.SetMat4("mModel", mModel);

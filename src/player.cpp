@@ -17,10 +17,11 @@ Player::~Player()
 
 void Player::Update(float fDeltaTime)
 {
-    vVel *= fSpeedScalar;
+    vVel += vImpulse;
     Collisions(fDeltaTime);
     CheckForSpecialTiles();
     vVel = glm::vec2(0.0f, 0.0f);
+    vImpulse *= fFriction;
 }
 
 
@@ -109,9 +110,6 @@ void Player::Collisions(float fDeltaTime)
 
 void Player::CheckForSpecialTiles()
 {
-    /*****************************************************/
-    /*        TODO - Fix error with tile position        */
-    /*****************************************************/
     glm::vec2 vPlanarPos = glm::vec2(vPos.x, vPos.z);
     glm::vec2 vCurTile = glm::floor(vPlanarPos);
 
@@ -152,16 +150,19 @@ void Player::CheckForSpecialTiles()
 void Player::ProcessMovement(EntityMovement eDir, float fDeltaTime)
 {
     if (eDir == EntityMovement::FORWARD)
-        vVel += vFront;
+        AddImpulse(glm::vec2(vFront.x, vFront.z) * fDeltaTime * fSpeedScalar);
     if (eDir == EntityMovement::BACKWARD)
-        vVel -= vFront;
+        AddImpulse(glm::vec2(-vFront.x, -vFront.z) * fDeltaTime * fSpeedScalar);
+
     if (eDir == EntityMovement::RIGHT)
-        vVel += vRight;
+        fRotAngle -= fRotSpeed * fDeltaTime;
     if (eDir == EntityMovement::LEFT)
-        vVel -= vRight;
+        fRotAngle += fRotSpeed * fDeltaTime;
 
     if (glm::length(vVel) * glm::length(vVel) > 0)
         vVel = glm::normalize(vVel);
+
+    UpdateVectors();
 }
 
 
@@ -190,4 +191,25 @@ void Player::Draw(Shader &cShader)
 {
     vPos.y = fHeightOffset;
     Object::Draw(cShader);
+}
+
+
+
+void Player::UpdateVectors()
+{
+    glm::vec3 front;
+    front.x = cos(glm::radians(-fRotAngle));
+    front.y = 0.0f;
+    front.z = sin(glm::radians(-fRotAngle));
+    vFront = glm::normalize(front);
+
+    vRight = glm::normalize(glm::cross(vFront, glm::vec3(0.0f, 1.0f, 0.0f)));
+}
+
+
+
+void Player::AddImpulse(glm::vec2 vImp)
+{
+    vImpulse += vImp;
+    vVel += vImpulse;
 }

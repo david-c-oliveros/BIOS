@@ -4,7 +4,7 @@
 
 World::World()
 {
-    cTileObj = std::make_unique<Object>("/res/debug_tile.obj");
+    cTileObj = std::make_unique<Object>("/res/tile.obj");
 }
 
 
@@ -19,8 +19,7 @@ void World::Draw(Shader &cShader)
 {
     for (auto &tile : vLevelTiles)
     {
-        //cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
-        cTileObj->vPos = tile.vPos;
+        cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
         cTileObj->vCol = tile.vCol;
         if (tile.bDebug)
             cTileObj->vCol = glm::vec3(0.0f, 0.5f, 0.0f);
