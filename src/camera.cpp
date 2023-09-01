@@ -91,16 +91,18 @@ void Camera::ProcessMouseScroll(float yoffset)
 
 
 
-void Camera::Orbit(std::shared_ptr<Object> vTarget, float fDeltaTime)
+void Camera::OrbitFollow(std::shared_ptr<Object> vTarget, float fDeltaTime)
 {
+    fYaw = vTarget->fRotAngle;
+
     float dist = glm::distance(vPos, vTarget->vPos);
     glm::mat4 R = glm::yawPitchRoll(glm::radians(fYaw), 0.0f, 0.0f);
 
-    glm::vec3 T = glm::vec3(-4.0f, dist, 0);
+    glm::vec3 T = glm::vec3(-7.0f, dist, 0);
     T = glm::vec3(R * glm::vec4(T, 0.0f));
     glm::vec3 vNewPos = vTarget->vPos + T;
     vPos.x = glm::mix(vPos.x, vNewPos.x, fDeltaTime);
-    vPos.y = glm::mix(vPos.y, 5.0f, fDeltaTime);
+    vPos.y = glm::mix(vPos.y, 8.0f, fDeltaTime);
     vPos.z = glm::mix(vPos.z, vNewPos.z, fDeltaTime);
     vFront = glm::normalize(vTarget->vPos - vPos);
 
@@ -121,19 +123,6 @@ void Camera::UpdateCameraVectors()
 
     vRight = glm::normalize(glm::cross(vFront, WorldUp));
     vUp    = glm::normalize(glm::cross(vRight, vFront));
-}
-
-
-
-void Camera::UpdateFollow(std::shared_ptr<Object> vFollowTarget, float fDeltaTime)
-{
-//    vPos.x = glm::mix(vPos.x, vFollowTarget->vPos.x - 4.0f, fDeltaTime * 4.0f);
-//    vPos.y = glm::max(vPos.y, 5.0f);
-//    vPos.z = glm::mix(vPos.z, vFollowTarget->vPos.z + 4.0f, fDeltaTime * 4.0f);
-
-    fYaw = vFollowTarget->fRotAngle;
-
-    Orbit(vFollowTarget, fDeltaTime);
 }
 
 

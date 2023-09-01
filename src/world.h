@@ -51,6 +51,7 @@ class World
         glm::ivec2 vWorldSize;
         std::vector<TileInst> vLevelTiles;
         std::unique_ptr<Object> cTileObj;
+        std::unique_ptr<Object> cWallObj;
         glm::vec3 vFogColor = glm::vec3(0.01f);
 
 

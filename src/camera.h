@@ -64,8 +64,7 @@ class Camera
         void ProcessKeyboard(Camera_Movement direction, float deltaTime, bool bDebug);
         void ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConstrainPitch = true);
         void ProcessMouseScroll(float yoffset);
-        void Orbit(std::shared_ptr<Object> vTarget, float fDeltaTime);
-        void UpdateFollow(std::shared_ptr<Object> vFollowTarget, float fDeltaTime);
+        void OrbitFollow(std::shared_ptr<Object> vTarget, float fDeltaTime);
 
         void PrintvPos();
 

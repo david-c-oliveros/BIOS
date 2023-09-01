@@ -71,7 +71,7 @@ void App::Update()
     SetDeltaTime();
     ProcessInput();
     pPlayer->Update(fDeltaTime);
-    cCamera.UpdateFollow(pPlayer, fDeltaTime);
+    cCamera.OrbitFollow(pPlayer, fDeltaTime);
     Render();
 
     glfwSwapBuffers(pWindow);
@@ -91,7 +91,7 @@ void App::SetDeltaTime()
 
 void App::Render()
 {
-    Renderer::Clear(glm::vec4(0.1f, 0.1f, 0.3f, 1.0f));
+    Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
 
     glm::mat4 mView = cCamera.GetViewMatrix();
     glm::mat4 mProjection = glm::perspective(glm::radians(cCamera.fZoom), (float)nCanvasWidth / (float)nCanvasHeight,  0.1f, 1000.0f);
@@ -100,6 +100,7 @@ void App::Render()
     cShader.SetMat4("mView", mView);
     cShader.SetMat4("mProjection", mProjection);
     cShader.SetVec3("vViewPos", cCamera.vPos);
+    cShader.SetVec3("vPlayerPos", pPlayer->vPos);
 
     pWorld->Draw(cShader);
     pPlayer->Draw(cShader);

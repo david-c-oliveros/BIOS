@@ -5,6 +5,7 @@
 World::World()
 {
     cTileObj = std::make_unique<Object>("/res/tile.obj");
+    cWallObj = std::make_unique<Object>("/res/wall.obj");
 }
 
 
@@ -19,11 +20,35 @@ void World::Draw(Shader &cShader)
 {
     for (auto &tile : vLevelTiles)
     {
-        cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
-        cTileObj->vCol = tile.vCol;
         if (tile.bDebug)
             cTileObj->vCol = glm::vec3(0.0f, 0.5f, 0.0f);
-        cTileObj->Draw(cShader);
+
+        switch(tile.eType)
+        {
+            case TileType::NORMAL:
+            {
+                cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
+                cTileObj->vCol = tile.vCol;
+                cTileObj->Draw(cShader);
+                break;
+            }
+
+            case TileType::SOLID:
+            {
+                cWallObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
+                cWallObj->vCol = tile.vCol;
+                cWallObj->Draw(cShader);
+                break;
+            }
+
+            default:
+            {
+                cTileObj->vPos = glm::vec3(tile.vPos.x + 0.5f, tile.vPos.y, tile.vPos.z + 0.5f);
+                cTileObj->vCol = tile.vCol;
+                cTileObj->Draw(cShader);
+                break;
+            }
+        }
     }
 }
 

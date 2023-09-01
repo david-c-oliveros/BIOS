@@ -43,14 +43,17 @@ void Player::Collisions(float fDeltaTime)
     glm::ivec2 vAreaTL = glm::max(glm::min(vCurCell, vTargetCell) - glm::ivec2(1, 1), glm::ivec2(0, 0));
     glm::ivec2 vAreaBR = glm::min(glm::max(vCurCell, vTargetCell) + glm::ivec2(1, 1), pWorld->vWorldSize);
 
-    for (auto &tile : pWorld->vLevelTiles)
+    if (bDebug)
     {
-        if (tile.eType == TileType::SOLID)
-            tile.vCol = glm::vec3(0.5f, 0.2f, 0.2f);
-        else if (tile.eType == TileType::NORMAL)
-            tile.vCol = glm::vec3(0.2f, 0.2f, 0.5f);
-        else
-            tile.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
+        for (auto &tile : pWorld->vLevelTiles)
+        {
+            if (tile.eType == TileType::SOLID)
+                tile.vCol = glm::vec3(0.5f, 0.2f, 0.2f);
+            else if (tile.eType == TileType::NORMAL)
+                tile.vCol = glm::vec3(0.2f, 0.2f, 0.5f);
+            else
+                tile.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
+        }
     }
 
     glm::ivec2 vCell;
@@ -80,7 +83,9 @@ void Player::Collisions(float fDeltaTime)
 
                 if (fOverlap > 0)
                 {
-                    pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.5f, 0.5f, 0.0f);
+                    if (bDebug)
+                        pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.5f, 0.5f, 0.0f);
+
                     glm::vec2 vNorm = glm::normalize(vRayToNearest);
 
                     if (std::isnan(vNorm.x))
@@ -95,12 +100,10 @@ void Player::Collisions(float fDeltaTime)
                     vPotentialPos = vPotentialPos - vNorm * fOverlap;
                 }
             }
-            else
+            else if (bDebug)
                 pWorld->vLevelTiles[nCurIndex].vCol = glm::vec3(0.0f, 0.5f, 0.0f);
         }
     }
-
-    pWorld->vLevelTiles[vCurCell.y * pWorld->vWorldSize.x + vCurCell.x].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
 
     vPos.x = vPotentialPos.x;
     vPos.z = vPotentialPos.y;
@@ -118,6 +121,7 @@ void Player::CheckForSpecialTiles()
     if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL_KEY)
     {
         pWorld->vLevelTiles[idx].eType = TileType::NORMAL;
+        pWorld->vLevelTiles[idx].vCol = glm::vec3(0.2f, 0.2f, 0.5f);
         vPortalKeys.push_back(pWorld->vLevelTiles[idx].nPortalKey);
     }
     else if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL)
@@ -134,15 +138,11 @@ void Player::CheckForSpecialTiles()
         {
             std::cout << "Locked! You must find the pointer to the next memory block" << std::endl;
         }
-        pWorld->vLevelTiles[idx].vCol = glm::vec3(0.0f, 0.5f, 0.5f);
     }
-    else
+    else if (bDebug)
     {
         pWorld->vLevelTiles[idx].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
     }
-    pWorld->vLevelTiles[idx].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
-
-    pWorld->vLevelTiles[0].vCol = glm::vec3(0.0f);
 }
 
 

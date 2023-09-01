@@ -44,15 +44,17 @@ class Player : public Object
 
         std::vector<uint32_t> vPortalKeys;
 
+        bool bDebug = false;
+
 
     private:
         float fHeightOffset = 0.4f;
         float fColliderRadius = 0.2f;
-        float fRotSpeed = 128.0f;
-        float fSpeedScalar = 16.0f;
+        float fRotSpeed = 180.0f;
+        float fSpeedScalar = 24.0f;
 
         glm::vec2 vImpulse = glm::vec2(0.0f, 0.0f);
-        float fFriction = 0.9f;
+        float fFriction = 0.8f;
 
 
     private:
