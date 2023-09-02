@@ -4,8 +4,8 @@
 
 World::World()
 {
-    cTileObj = std::make_unique<Object>("/res/tile.obj");
-    cWallObj = std::make_unique<Object>("/res/wall.obj");
+    cTileObj = std::make_unique<Object>("/res/models/tile.obj");
+    cWallObj = std::make_unique<Object>("/res/models/wall.obj");
 }
 
 
@@ -76,6 +76,23 @@ void World::GenDebugWorld()
 
 
 
+bool World::LoadNextLevel(Shader &cShader)
+{
+    std::string sPath = nCurLevel >= 10 ? "/res/levels/level_" : "/res/levels/level_0";
+    std::stringstream ss;
+    ss << sPath << nCurLevel << ".lvl";
+    std::cout << "Loading next level" << std::endl;
+    if (!LoadLevel(ss.str(), cShader))
+    {
+        std::cout << "ERROR: Failed to process level" << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+
+
 bool World::LoadLevel(std::string sLevelPath, Shader &cShader)
 {
     std::ifstream fin;
@@ -98,16 +115,14 @@ bool World::LoadLevel(std::string sLevelPath, Shader &cShader)
 
     fin.close();
 
-    vWorldSize = glm::ivec2(vLevelStr[0].length(), y);
-
-    std::cout << glm::to_string(vWorldSize) << std::endl;
-
     if (!ProcessLevel(vLevelStr, cShader))
     {
         std::cout << "ERROR: Failed to process level" << std::endl;
         return false;
     }
 
+    nCurLevel++;
+   
     return true;
 }
 
@@ -115,17 +130,21 @@ bool World::LoadLevel(std::string sLevelPath, Shader &cShader)
 
 bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 {
-    glm::ivec2 vKeyIndex;
-    glm::ivec2 vPortalIndex;
+    int y = 0;
+    vWorldSize.x = vLevelStr[0].length();
 
-    for (int y = 0; y < vWorldSize.y; y++)
+    int nKeyIndex;
+    int nPortalIndex;
+
+//    for (int y = 0; y < vWorldSize.y; y++)
+    for (auto &line : vLevelStr)
     {
-        for (int x = 0; x < vWorldSize.x; x++)
+        for (int x = 0; x < line.length(); x++)
         {
             TileInst t;
             t.vPos = glm::vec3(x, 0, y);
 
-            switch(vLevelStr[y][x])
+            switch(line[x])
             {
                 case '=':
                 {
@@ -147,7 +166,6 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 
                 case 'i':
                 {
-                    vPortalIndex = glm::ivec2(x, y);
                     t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
                     t.eType = TileType::SPAWN;
                     t.nID = nCurUUID++;
@@ -157,7 +175,7 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 
                 case 'o':
                 {
-                    vPortalIndex = glm::ivec2(x, y);
+                    nPortalIndex = y * vWorldSize.x + x;
                     t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
                     t.eType = TileType::PORTAL;
                     t.nID = nCurUUID++;
@@ -167,7 +185,7 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 
                 case 'p':
                 {
-                    vKeyIndex = glm::ivec2(x, y);
+                    nKeyIndex = y * vWorldSize.x + x;
                     t.vCol = glm::vec3(0.0f, 0.5f, 0.5f);
                     t.eType = TileType::PORTAL_KEY;
                     t.bDebug = false;
@@ -187,13 +205,42 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 
             vLevelTiles.push_back(t);
         }
+
+        y++;
+        vWorldSize.y = y;
     }
 
-    int32_t nKeyID = vLevelTiles[vPortalIndex.y * vWorldSize.x + vPortalIndex.x].nID;
+    int32_t nKeyID = vLevelTiles[nPortalIndex].nID;
     if (nKeyID >= 0)
-        vLevelTiles[vKeyIndex.y * vWorldSize.x + vKeyIndex.x].nPortalKey = nKeyID;
+        vLevelTiles[nKeyIndex].nPortalKey = nKeyID;
+
+    PrintLevelInfo();
 
     return true;
+}
+
+
+
+void World::PrintLevelInfo()
+{
+    for (auto &tile : vLevelTiles)
+    {
+        switch(tile.eType)
+        {
+            case TileType::PORTAL_KEY:
+            {
+                std::cout << "Portal key ID: " << tile.nPortalKey << std::endl;
+                break;
+            }
+
+            case TileType::PORTAL:
+            {
+                std::cout << "Portal Index: " << glm::to_string(tile.vPos) << std::endl;
+                std::cout << "Portal ID: " << tile.nID << std::endl;
+                break;
+            }
+        }
+    }
 }
 
 
@@ -210,8 +257,11 @@ glm::ivec3 World::GetSpawnLoc()
     for (auto tile : vLevelTiles)
     {
         if (tile.eType == TileType::SPAWN)
+        {
             return tile.vPos;
+        }
     }
 
+    std::cout << "ERROR: No valid spawn tile" << std::endl;
     return glm::ivec3(-1, 0, -1);
 }

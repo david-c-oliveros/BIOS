@@ -124,15 +124,19 @@ void Player::CheckForSpecialTiles(Shader &cShader)
         pWorld->vLevelTiles[idx].vCol = glm::vec3(0.2f, 0.2f, 0.5f);
         cShader.SetBool("bOn", false);
         vPortalKeys.push_back(pWorld->vLevelTiles[idx].nPortalKey);
+        std::cout << "Found portal key" << std::endl;
+//        for (auto &nKeyID : vPortalKeys)
+//            std::cout << "Portal Key ID: " << nKeyID << std::endl;
     }
     else if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL)
     {
+        std::cout << "Portal ID: " << pWorld->vLevelTiles[idx].nID << std::endl;
         // Check if we have a Portal Key with an id that matches
         // that of the Portal, and if so, load into new level
         if (CheckForIDMatch(pWorld->vLevelTiles[idx]))
         {
             pWorld->UnloadLevel();
-            pWorld->LoadLevel("/res/level_02.lvl", cShader);
+            pWorld->LoadNextLevel(cShader);
             Spawn(pWorld->GetSpawnLoc());
         }
         else
@@ -183,7 +187,7 @@ bool Player::CheckForIDMatch(TileInst &sTile)
 
 void Player::Spawn(glm::vec3 vNewPos)
 {
-    vPos = vNewPos;
+    vPos = vNewPos + 0.5f;
 }
 
 

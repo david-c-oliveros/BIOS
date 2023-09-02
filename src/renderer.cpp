@@ -47,7 +47,6 @@ void Renderer::DrawText(GLTtext* pScreenText, const char* pStr, glm::ivec2 vPos,
 
     if (bAligned)
     {
-        std::cout << "Rendering aligned text\n";
         gltDrawText2DAligned(pScreenText,
                              (GLfloat)vPos.x,
                              (GLfloat)vPos.y,
@@ -56,7 +55,6 @@ void Renderer::DrawText(GLTtext* pScreenText, const char* pStr, glm::ivec2 vPos,
     }
     else
     {
-        std::cout << "Rendering text\n";
         gltDrawText2D(pScreenText, (GLfloat)vPos.x, (GLfloat)vPos.y, fScale);
     }
 

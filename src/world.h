@@ -42,8 +42,10 @@ class World
 
         void GenDebugWorld();
         void Draw(Shader &cShader);
+        bool LoadNextLevel(Shader &cShader);
         bool LoadLevel(std::string sPath, Shader &cShader);
         void UnloadLevel();
+        void PrintLevelInfo();
         glm::ivec3 GetSpawnLoc();
 
 
@@ -57,6 +59,7 @@ class World
 
     private:
         uint32_t nCurUUID = 0;
+        uint32_t nCurLevel = 0;
 
 
     private:

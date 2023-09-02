@@ -33,6 +33,10 @@
 
 
 
+#define NUM_KEYS 64
+
+
+
 enum class KEYS
 {
     W,
@@ -42,7 +46,9 @@ enum class KEYS
     UP,
     DOWN,
     LEFT,
-    RIGHT
+    RIGHT,
+    ENTER,
+    P
 };
 
 
@@ -50,7 +56,8 @@ enum class KEYS
 enum class GameState
 {
     MENU,
-    RUNNING
+    RUNNING,
+    DEBUG
 };
 
 
@@ -89,7 +96,6 @@ class App
         GLFWwindow* pWindow;
 
         Shader cShader;
-        GameState eState;
 
         GLTtext* pScreenText;
         glm::vec3 vTextColor = glm::vec3(1.0f);

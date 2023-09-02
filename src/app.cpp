@@ -7,6 +7,7 @@
 /**********************************/
 /*        Global Variables        */
 /**********************************/
+GameState eState;
 
 float fDeltaTime = 0.0f;
 float fLastFrame = 0.0f;
@@ -17,7 +18,7 @@ float fLast_Y = 0.0f;
 
 bool bFirstMouse = true;
 
-std::array<bool, 8> aKeyStates;
+std::array<bool, NUM_KEYS> aKeyStates;
 
 /**********************************/
 
@@ -51,18 +52,18 @@ void App::Create()
     eState = GameState::MENU;
 
     pWorld = std::make_shared<World>();
-    if (!pWorld->LoadLevel("/res/level_01.lvl", cShader))
+    if (!pWorld->LoadNextLevel(cShader))
         std::cout << "ERROR: Failed to load level" << std::endl;
 
-    pCube = std::make_unique<Object>("/res/cube.obj");
+    pCube = std::make_unique<Object>("/res/models/cube.obj");
     pCube->vPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    pPlayer = std::make_unique<Player>(pWorld, "/res/robot.obj");
+    pPlayer = std::make_unique<Player>(pWorld, "/res/models/robot.obj");
     pPlayer->vPos = glm::vec3(8.5f, 0.4f, 8.5f);
     pPlayer->vCol = glm::vec3(0.3f, 0.3f, 0.45f);
     pPlayer->fShininess = 128.0f;
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < NUM_KEYS; i++)
     {
         aKeyStates[i] = false;
     }
@@ -113,7 +114,9 @@ void App::SetDeltaTime()
 void App::RenderMenu()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
-    Renderer::DrawText(pScreenText, "Hello World!", glm::ivec2(nCanvasWidth / 2, nCanvasHeight / 2), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, false);
+    Renderer::DrawText(pScreenText, "Press Enter to begin",
+                       glm::ivec2(nCanvasWidth / 2, nCanvasHeight / 2),
+                       glm::vec3(1.0f, 1.0f, 1.0f), 4.0f, true);
 }
 
 
@@ -207,23 +210,45 @@ void App::GLFWConfig()
 
 void App::ProcessInput()
 {
-    if (aKeyStates[(size_t)KEYS::W])
-        cCamera.ProcessKeyboard(Camera_Movement::FORWARD, fDeltaTime, false);
-    if (aKeyStates[(size_t)KEYS::S])
-        cCamera.ProcessKeyboard(Camera_Movement::BACKWARD, fDeltaTime, false);
-    if (aKeyStates[(size_t)KEYS::A])
-        cCamera.ProcessKeyboard(Camera_Movement::LEFT, fDeltaTime, false);
-    if (aKeyStates[(size_t)KEYS::D])
-        cCamera.ProcessKeyboard(Camera_Movement::RIGHT, fDeltaTime, false);
+    switch(eState)
+    {
+        case GameState::MENU:
+        {
+            if (aKeyStates[(size_t)KEYS::ENTER])
+                eState = GameState::RUNNING;
 
-    if (aKeyStates[(size_t)KEYS::W])
-        pPlayer->ProcessMovement(EntityMovement::FORWARD, fDeltaTime);
-    if (aKeyStates[(size_t)KEYS::S])
-        pPlayer->ProcessMovement(EntityMovement::BACKWARD, fDeltaTime);
-    if (aKeyStates[(size_t)KEYS::A])
-        pPlayer->ProcessMovement(EntityMovement::LEFT, fDeltaTime);
-    if (aKeyStates[(size_t)KEYS::D])
-        pPlayer->ProcessMovement(EntityMovement::RIGHT, fDeltaTime);
+            break;
+        }
+
+        case GameState::RUNNING:
+        {
+            if (aKeyStates[(size_t)KEYS::P])
+                pWorld->LoadNextLevel(cShader);
+
+            if (aKeyStates[(size_t)KEYS::W])
+                pPlayer->ProcessMovement(EntityMovement::FORWARD, fDeltaTime);
+            if (aKeyStates[(size_t)KEYS::S])
+                pPlayer->ProcessMovement(EntityMovement::BACKWARD, fDeltaTime);
+            if (aKeyStates[(size_t)KEYS::A])
+                pPlayer->ProcessMovement(EntityMovement::LEFT, fDeltaTime);
+            if (aKeyStates[(size_t)KEYS::D])
+                pPlayer->ProcessMovement(EntityMovement::RIGHT, fDeltaTime);
+
+            break;
+        }
+
+        case GameState::DEBUG:
+        {
+            if (aKeyStates[(size_t)KEYS::W])
+                cCamera.ProcessKeyboard(Camera_Movement::FORWARD, fDeltaTime, false);
+            if (aKeyStates[(size_t)KEYS::S])
+                cCamera.ProcessKeyboard(Camera_Movement::BACKWARD, fDeltaTime, false);
+            if (aKeyStates[(size_t)KEYS::A])
+                cCamera.ProcessKeyboard(Camera_Movement::LEFT, fDeltaTime, false);
+            if (aKeyStates[(size_t)KEYS::D])
+                cCamera.ProcessKeyboard(Camera_Movement::RIGHT, fDeltaTime, false);
+        }
+    }
 }
 
 
@@ -276,6 +301,9 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
 {
     if (!strcmp(e->key, " "))
         emscripten_request_pointerlock("#canvas", 1);
+
+    if (!strcmp(e->key, "Enter"))
+        aKeyStates[(size_t)KEYS::ENTER] = !aKeyStates[(size_t)KEYS::ENTER];
 
     if (!strcmp(e->key, "w"))
         aKeyStates[(size_t)KEYS::W] = false;
