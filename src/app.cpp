@@ -1,3 +1,5 @@
+#define GLT_IMPLEMENTATION
+
 #include "app.h"
 
 
@@ -39,9 +41,14 @@ void App::Create()
 {
     Renderer::Init_GLFW(pWindow, nCanvasWidth, nCanvasHeight);
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, glContext, attrs);
+    Renderer::Init_GLText();
     GLFWConfig();
 
     LoadShaders();
+
+    pScreenText = gltCreateText();
+
+    eState = GameState::MENU;
 
     pWorld = std::make_shared<World>();
     if (!pWorld->LoadLevel("/res/level_01.lvl", cShader))
@@ -70,9 +77,23 @@ void App::Update()
 {
     SetDeltaTime();
     ProcessInput();
-    pPlayer->Update(fDeltaTime, cShader);
-    cCamera.OrbitFollow(pPlayer, fDeltaTime);
-    Render();
+
+    switch(eState)
+    {
+        case GameState::MENU:
+        {
+            RenderMenu();
+            break;
+        }
+
+        case GameState::RUNNING:
+        {
+            pPlayer->Update(fDeltaTime, cShader);
+            cCamera.OrbitFollow(pPlayer, fDeltaTime);
+            RenderGame();
+            break;
+        }
+    }
 
     glfwSwapBuffers(pWindow);
     glfwPollEvents();
@@ -89,7 +110,15 @@ void App::SetDeltaTime()
 
 
 
-void App::Render()
+void App::RenderMenu()
+{
+    Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
+    Renderer::DrawText(pScreenText, "Hello World!", glm::ivec2(nCanvasWidth / 2, nCanvasHeight / 2), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, false);
+}
+
+
+
+void App::RenderGame()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
 
@@ -100,7 +129,6 @@ void App::Render()
     cShader.SetMat4("mView", mView);
     cShader.SetMat4("mProjection", mProjection);
     cShader.SetVec3("vViewPos", cCamera.vPos);
-    cShader.SetVec3("vPlayerPos", pPlayer->vPos);
     cShader.SetVec3("sPlayerLight.position", pPlayer->vPos);
 
     pWorld->Draw(cShader);
@@ -157,7 +185,6 @@ void App::LoadShaders()
     cShader.SetFloat("sKeyLight.linear", 0.04f);
     cShader.SetFloat("sKeyLight.quadratic", 0.064f);
     cShader.SetBool("bOn", true);
-
 
     cShader.SetVec3("vFogColor", vFogColor);
 

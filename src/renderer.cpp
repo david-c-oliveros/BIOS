@@ -1,3 +1,6 @@
+#define GLT_IMPLEMENTATION
+#define GLT_DEBUG_PRINT
+
 #include "renderer.h"
 
 
@@ -32,6 +35,32 @@ void Renderer::Draw(GLuint &vao, GLuint &vbo, GLuint shaderID, GLuint nNumVert)
 
     glDrawElements(GL_TRIANGLES, nNumVert, GL_UNSIGNED_INT, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+
+
+void Renderer::DrawText(GLTtext* pScreenText, const char* pStr, glm::ivec2 vPos, glm::vec3 vColor, float fScale, bool bAligned)
+{
+    gltBeginDraw();
+    gltSetText(pScreenText, pStr);
+    gltColor(vColor.x, vColor.y, vColor.z, 1.0f);
+
+    if (bAligned)
+    {
+        std::cout << "Rendering aligned text\n";
+        gltDrawText2DAligned(pScreenText,
+                             (GLfloat)vPos.x,
+                             (GLfloat)vPos.y,
+                             fScale,
+                             GLT_CENTER, GLT_CENTER);
+    }
+    else
+    {
+        std::cout << "Rendering text\n";
+        gltDrawText2D(pScreenText, (GLfloat)vPos.x, (GLfloat)vPos.y, fScale);
+    }
+
+    gltEndDraw();
 }
 
 
@@ -73,6 +102,19 @@ bool Renderer::Init_WebGL(uint32_t nWidth, uint32_t nHeight, EMSCRIPTEN_WEBGL_CO
     emscripten_webgl_make_context_current(glContext);
 
     //assert(emscripten_webgl_enable_OES_vertex_array_object(glContext));
+
+    return true;
+}
+
+
+
+bool Renderer::Init_GLText()
+{
+    if (!gltInit())
+    {
+        std::cout << "\nERROR: Failed to initialize glText" << std::endl;
+        return false;
+    }
 
     return true;
 }

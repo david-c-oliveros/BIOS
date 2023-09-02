@@ -12,8 +12,6 @@
 
 #include <GLFW/glfw3.h>
 
-#include <box2d/box2d.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -23,6 +21,8 @@
 #include <webgl/webgl2.h>
 
 #include <GLES3/gl3.h>
+
+#include <gltext.h>
 
 #include "renderer.h"
 #include "shader.h"
@@ -46,6 +46,15 @@ enum class KEYS
 };
 
 
+
+enum class GameState
+{
+    MENU,
+    RUNNING
+};
+
+
+
 void Framebuffer_Size_Callback(GLFWwindow* pWindow, int nWidth, int nHeight);
 EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userData);
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
@@ -64,9 +73,11 @@ class App
         void GLFWConfig();
         void Update();
         void SetDeltaTime();
-        void Render();
+        void RenderMenu();
+        void RenderGame();
         void PrintDebug();
         void LoadShaders();
+        void LoadText();
         void ProcessInput();
         void InitBox2D();
 
@@ -78,12 +89,14 @@ class App
         GLFWwindow* pWindow;
 
         Shader cShader;
+        GameState eState;
+
+        GLTtext* pScreenText;
+        glm::vec3 vTextColor = glm::vec3(1.0f);
 
         std::shared_ptr<World> pWorld;
         std::shared_ptr<Player> pPlayer;
         std::unique_ptr<Object> pCube;
-
-        GLuint shader;
 
     private:
         EmscriptenWebGLContextAttributes attrs;

@@ -33,6 +33,7 @@ include_directories(
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC external/glad
+    PUBLIC external/glText
     PUBLIC external/stb
     PUBLIC external/glm
     PUBLIC external/box2d/include
