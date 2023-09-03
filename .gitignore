@@ -6,6 +6,12 @@ tmp
 c.sh
 todo
 ideas
+notes
+extra
+cl.sh
+wc.sh
+miniaudio.h
+soloud
 
 # Prerequisites
 *.d

@@ -54,6 +54,7 @@ class Camera
         float fZoom;
 
         bool bSprint;
+        bool bMenu = true;
         bool bConstrainToFloor;
 
         Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
@@ -65,11 +66,8 @@ class Camera
         void ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConstrainPitch = true);
         void ProcessMouseScroll(float yoffset);
         void OrbitFollow(std::shared_ptr<Object> vTarget, float fDeltaTime);
-
-        void PrintvPos();
-
-    private:
         void UpdateCameraVectors();
+        void PrintvPos();
 };
 
 #endif

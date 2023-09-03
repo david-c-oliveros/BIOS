@@ -33,13 +33,16 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 glm::mat4 Camera::GetViewMatrix()
 {
-    //return glm::lookAt(vPos, vPos + vFront, vUp);
+    if (bMenu)
+        return glm::lookAt(vPos, vPos + vFront, vUp);
+
     return mView;
 }
 
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime, bool bDebug)
 {
+    std::cout << "Camera position: " << glm::to_string(vPos) << std::endl;
     float totalSpeed = bSprint ? fSprintSpeed * deltaTime : fMovementSpeed * deltaTime;
     if (bDebug)
         totalSpeed *= 4;
@@ -60,6 +63,8 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime, bool bD
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean bConstrainPitch)
 {
+    std::cout << "Yaw: " << fYaw << std::endl;
+    std::cout << "Pitch: " << fPitch << std::endl;
     xoffset *= fMouseSensitivity;
     yoffset *= fMouseSensitivity;
 
@@ -98,11 +103,11 @@ void Camera::OrbitFollow(std::shared_ptr<Object> vTarget, float fDeltaTime)
     float dist = glm::distance(vPos, vTarget->vPos);
     glm::mat4 R = glm::yawPitchRoll(glm::radians(fYaw), 0.0f, 0.0f);
 
-    glm::vec3 T = glm::vec3(-7.0f, dist, 0);
+    glm::vec3 T = glm::vec3(-5.0f, dist, 0);
     T = glm::vec3(R * glm::vec4(T, 0.0f));
     glm::vec3 vNewPos = vTarget->vPos + T;
     vPos.x = glm::mix(vPos.x, vNewPos.x, fDeltaTime);
-    vPos.y = glm::mix(vPos.y, 8.0f, fDeltaTime);
+    vPos.y = glm::mix(vPos.y, 5.0f, fDeltaTime);
     vPos.z = glm::mix(vPos.z, vNewPos.z, fDeltaTime);
     vFront = glm::normalize(vTarget->vPos - vPos);
 

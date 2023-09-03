@@ -136,7 +136,6 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
     int nKeyIndex;
     int nPortalIndex;
 
-//    for (int y = 0; y < vWorldSize.y; y++)
     for (auto &line : vLevelStr)
     {
         for (int x = 0; x < line.length(); x++)
@@ -166,9 +165,14 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
 
                 case 'i':
                 {
-                    t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
+                    t.vCol = glm::vec3(0.0f, 0.0f, 0.0f);
                     t.eType = TileType::SPAWN;
                     t.nID = nCurUUID++;
+
+                    cShader.Use();
+                    cShader.SetVec3("sInPortalLight.position", glm::vec3(t.vPos) + glm::vec3(0.5f, 0.0f, 0.5f));
+                    cShader.SetBool("bInPortalOn", true);
+
                     t.bDebug = false;
                     break;
                 }
@@ -176,9 +180,14 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
                 case 'o':
                 {
                     nPortalIndex = y * vWorldSize.x + x;
-                    t.vCol = glm::vec3(0.8f, 0.8f, 0.8f);
+                    t.vCol = glm::vec3(0.03f, 0.5f, 0.0f);
                     t.eType = TileType::PORTAL;
                     t.nID = nCurUUID++;
+
+                    cShader.Use();
+                    cShader.SetVec3("sOutPortalLight.position", glm::vec3(t.vPos) + glm::vec3(0.5f, 0.0f, 0.5f));
+                    cShader.SetBool("bOutPortalOn", true);
+
                     t.bDebug = false;
                     break;
                 }
@@ -186,11 +195,15 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
                 case 'p':
                 {
                     nKeyIndex = y * vWorldSize.x + x;
-                    t.vCol = glm::vec3(0.0f, 0.5f, 0.5f);
+                    t.vCol = glm::vec3(0.03f, 0.5f, 0.5f);
                     t.eType = TileType::PORTAL_KEY;
                     t.bDebug = false;
                     t.nID = nCurUUID++;
+
+                    cShader.Use();
                     cShader.SetVec3("sKeyLight.position", glm::vec3(t.vPos) + glm::vec3(0.5f, 0.0f, 0.5f));
+                    cShader.SetBool("bKeyOn", true);
+
                     break;
                 }
 

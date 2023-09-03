@@ -25,15 +25,13 @@ class Player : public Object
         Player(std::shared_ptr<World> _pWorld, std::string _sPath, glm::vec3 _vPos = glm::vec3(0.0f), float _fRotAngle = 0.0f);
         ~Player();
 
-        void Update(float fDeltaTime, Shader &cShader);
+        void Update(float fDeltaTime);
         void Collisions(float fDeltaTime);
         void DrawDebug(Shader &cShader);
-        void CheckForSpecialTiles(Shader &cShader);
         void ProcessMovement(EntityMovement dir, float fDeltaTime);
         void Spawn(glm::vec3 vNewPos);
         void Draw(Shader &cShader);
         void UpdateVectors();
-        void Orbit(glm::vec3 vTarget);
 
 
     public:
@@ -44,12 +42,14 @@ class Player : public Object
 
         std::vector<uint32_t> vPortalKeys;
 
+        uint32_t nRunTime = 0;
+
         bool bDebug = false;
 
 
     private:
         float fHeightOffset = 0.4f;
-        float fColliderRadius = 0.2f;
+        float fColliderRadius = 0.28f;
         float fRotSpeed = 180.0f;
         float fSpeedScalar = 24.0f;
 
@@ -58,6 +58,5 @@ class Player : public Object
 
 
     private:
-        bool CheckForIDMatch(TileInst &sTile);
         void AddImpulse(glm::vec2 vImp);
 };

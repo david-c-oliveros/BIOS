@@ -15,11 +15,10 @@ Player::~Player()
 
 
 
-void Player::Update(float fDeltaTime, Shader &cShader)
+void Player::Update(float fDeltaTime)
 {
     vVel += vImpulse;
     Collisions(fDeltaTime);
-    CheckForSpecialTiles(cShader);
     vVel = glm::vec2(0.0f, 0.0f);
     vImpulse *= fFriction;
 }
@@ -111,47 +110,6 @@ void Player::Collisions(float fDeltaTime)
 
 
 
-void Player::CheckForSpecialTiles(Shader &cShader)
-{
-    glm::vec2 vPlanarPos = glm::vec2(vPos.x, vPos.z);
-    glm::vec2 vCurTile = glm::floor(vPlanarPos);
-
-    int idx = vCurTile.y * pWorld->vWorldSize.x + vCurTile.x;
-
-    if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL_KEY)
-    {
-        pWorld->vLevelTiles[idx].eType = TileType::NORMAL;
-        pWorld->vLevelTiles[idx].vCol = glm::vec3(0.2f, 0.2f, 0.5f);
-        cShader.SetBool("bOn", false);
-        vPortalKeys.push_back(pWorld->vLevelTiles[idx].nPortalKey);
-        std::cout << "Found portal key" << std::endl;
-//        for (auto &nKeyID : vPortalKeys)
-//            std::cout << "Portal Key ID: " << nKeyID << std::endl;
-    }
-    else if (pWorld->vLevelTiles[idx].eType == TileType::PORTAL)
-    {
-        std::cout << "Portal ID: " << pWorld->vLevelTiles[idx].nID << std::endl;
-        // Check if we have a Portal Key with an id that matches
-        // that of the Portal, and if so, load into new level
-        if (CheckForIDMatch(pWorld->vLevelTiles[idx]))
-        {
-            pWorld->UnloadLevel();
-            pWorld->LoadNextLevel(cShader);
-            Spawn(pWorld->GetSpawnLoc());
-        }
-        else
-        {
-            std::cout << "Locked! You must find the pointer to the next memory block" << std::endl;
-        }
-    }
-    else if (bDebug)
-    {
-        pWorld->vLevelTiles[idx].vCol = glm::vec3(0.5f, 0.0f, 0.5f);
-    }
-}
-
-
-
 void Player::ProcessMovement(EntityMovement eDir, float fDeltaTime)
 {
     if (eDir == EntityMovement::FORWARD)
@@ -168,19 +126,6 @@ void Player::ProcessMovement(EntityMovement eDir, float fDeltaTime)
         vVel = glm::normalize(vVel);
 
     UpdateVectors();
-}
-
-
-
-bool Player::CheckForIDMatch(TileInst &sTile)
-{
-    for (auto &nKeyID : vPortalKeys)
-    {
-        if (nKeyID == sTile.nID)
-            return true;
-    }
-
-    return false;
 }
 
 

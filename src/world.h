@@ -56,10 +56,12 @@ class World
         std::unique_ptr<Object> cWallObj;
         glm::vec3 vFogColor = glm::vec3(0.01f);
 
+        uint32_t nCurLevel = 0;
+        uint32_t nMaxLevel = 1;
+
 
     private:
         uint32_t nCurUUID = 0;
-        uint32_t nCurLevel = 0;
 
 
     private:

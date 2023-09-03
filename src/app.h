@@ -23,6 +23,12 @@
 #include <GLES3/gl3.h>
 
 #include <gltext.h>
+//#include <soloud.h>
+//#include <soloud_wav.h>
+
+#include <olcPixelGameEngine.h>
+#include <olcPGEX_Sound.h>
+#include"miniaudio.h"
 
 #include "renderer.h"
 #include "shader.h"
@@ -56,7 +62,9 @@ enum class KEYS
 enum class GameState
 {
     MENU,
+    CREDITS,
     RUNNING,
+    WIN,
     DEBUG
 };
 
@@ -67,6 +75,7 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData);
+float RandFloatInRange(float fMin, float fMax);
 
 
 
@@ -82,11 +91,14 @@ class App
         void SetDeltaTime();
         void RenderMenu();
         void RenderGame();
+        void RenderCreditsScreen();
+        void RenderEndScreen();
+        void CheckForSpecialTiles();
+        bool CheckForIDMatch(TileInst &sTile);
         void PrintDebug();
         void LoadShaders();
         void LoadText();
         void ProcessInput();
-        void InitBox2D();
 
 
     public:
@@ -95,14 +107,8 @@ class App
         GLuint vbo, vao, ebo;
         GLFWwindow* pWindow;
 
-        Shader cShader;
-
         GLTtext* pScreenText;
         glm::vec3 vTextColor = glm::vec3(1.0f);
-
-        std::shared_ptr<World> pWorld;
-        std::shared_ptr<Player> pPlayer;
-        std::unique_ptr<Object> pCube;
 
     private:
         EmscriptenWebGLContextAttributes attrs;
