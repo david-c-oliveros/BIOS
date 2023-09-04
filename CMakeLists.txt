@@ -23,29 +23,6 @@ add_executable(${PROJECT_NAME}
     src/world.cpp
     src/player.cpp
     src/olcPixelGameEngine.cpp
-    #    src/soloud/core/soloud.cpp
-    #    src/soloud/core/soloud_audiosource.cpp
-    #    src/soloud/core/soloud_bus.cpp
-    #    src/soloud/core/soloud_core_3d.cpp
-    #    src/soloud/core/soloud_core_basicops.cpp
-    #    src/soloud/core/soloud_core_faderops.cpp
-    #    src/soloud/core/soloud_core_getters.cpp
-    #    src/soloud/core/soloud_core_setters.cpp
-    #    src/soloud/core/soloud_core_voicegroup.cpp
-    #    src/soloud/core/soloud_core_voiceops.cpp
-    #    src/soloud/core/soloud_fader.cpp
-    #    src/soloud/core/soloud_fft.cpp
-    #    src/soloud/core/soloud_fft_lut.cpp
-    #    src/soloud/core/soloud_file.cpp
-    #    src/soloud/core/soloud_filter.cpp
-    #    src/soloud/core/soloud_misc.cpp
-    #    src/soloud/core/soloud_queue.cpp
-    #    src/soloud/core/soloud_thread.cpp
-    #    src/soloud/miniaudio/soloud_miniaudio.cpp
-    #    src/soloud/wav/dr_impl.cpp
-    #    src/soloud/wav/soloud_wav.cpp
-    #    src/soloud/wav/soloud_wavstream.cpp
-    #    src/soloud/wav/stb_vorbis.c
     )
 
 #add_subdirectory(external/glfw)
@@ -94,4 +71,3 @@ set_target_properties(${PROJECT_NAME}
     -s USE_GLFW=3 \
     --preload-file res \
     --preload-file shaders")
-#LINK_FLAGS " --bind --emrun -sUSE_PTHREADS -DMA_ENABLE_AUDIO_WORKLETS -sAUDIO_WORKLET=1 -sASYNCIFY -sWASM_WORKERS=1 -sFORCE_FILESYSTEM -sFULL_ES3=1 -sWASM=1 -sEXPORT_ALL=1 -sALLOW_MEMORY_GROWTH=1 -sALLOW_MEMORY_GROWTH=1 -sMIN_WEBGL_VERSION=2 -sUSE_LIBPNG=1 -sUSE_WEBGL2=1 -sUSE_GLFW=3 --preload-file res --preload-file shaders")
