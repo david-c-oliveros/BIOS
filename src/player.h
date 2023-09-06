@@ -19,13 +19,21 @@ enum class EntityMovement
 
 
 
+enum class PlayerState
+{
+    STATIC,
+    MOVING
+};
+
+
+
 class Player : public Object
 {
     public:
         Player(std::shared_ptr<World> _pWorld, std::string _sPath, glm::vec3 _vPos = glm::vec3(0.0f), float _fRotAngle = 0.0f);
         ~Player();
 
-        void Update(float fDeltaTime);
+        void Update(float fDeltaTime, std::vector<PlayerState>& vecSignalBuffer);
         void Collisions(float fDeltaTime);
         void DrawDebug(Shader &cShader);
         void ProcessMovement(EntityMovement dir, float fDeltaTime);
@@ -38,7 +46,9 @@ class Player : public Object
         glm::vec2 vVel = glm::vec2(0.0f, 0.0f);
         glm::vec3 vFront = glm::vec3(1.0f, 0.0f, 0.0f);
         glm::vec3 vRight = glm::vec3(0.0f, 0.0f, 1.0f);
+
         std::shared_ptr<World> pWorld;
+        PlayerState eState = PlayerState::STATIC;
 
         std::vector<uint32_t> vPortalKeys;
 

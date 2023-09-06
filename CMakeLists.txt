@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME}
     src/shader.cpp
     src/world.cpp
     src/player.cpp
+    src/audio.cpp
     )
 
 #add_subdirectory(external/glfw)

@@ -30,6 +30,7 @@
 #include "camera.h"
 #include "world.h"
 #include "player.h"
+#include "audio.h"
 
 
 
@@ -71,10 +72,6 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData);
-void MA_DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
-
-bool MiniAudioInit(const char* pPath, ma_device &gDevice, ma_decoder &decoder);
-bool MiniAudioStartDevice(ma_device &gDevice);
 float RandFloatInRange(float fMin, float fMax);
 
 
@@ -88,6 +85,7 @@ class App
         void Create();
         void GLFWConfig();
         void Update();
+        void ProcessSignals();
         void SetDeltaTime();
         void RenderMenu();
         void RenderGame();
@@ -107,17 +105,13 @@ class App
         GLuint vbo, vao, ebo;
         GLFWwindow* pWindow;
 
+        std::vector<PlayerState> vecSignalBuffer;
+
+        std::unique_ptr<Audio> pMusic;
+        std::unique_ptr<Audio> pMoveSFX;
+
         GLTtext* pScreenText;
         glm::vec3 vTextColor = glm::vec3(1.0f);
-
-        /******************************/
-        /*        Audio Engine        */
-        /******************************/
-        ma_device gDevice1;
-        ma_device gDevice2;
-        ma_decoder gDecoderMusic1;
-        ma_decoder gDecoderMusic2;
-
 
 
     private:

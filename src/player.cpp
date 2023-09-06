@@ -15,10 +15,22 @@ Player::~Player()
 
 
 
-void Player::Update(float fDeltaTime)
+void Player::Update(float fDeltaTime, std::vector<PlayerState>& vecSignalBuffer)
 {
     vVel += vImpulse;
     Collisions(fDeltaTime);
+
+    if (eState == PlayerState::MOVING && glm::length(vVel) < 0.0001)
+    {
+        eState = PlayerState::STATIC;
+        vecSignalBuffer.push_back(eState);
+    }
+    else if (eState == PlayerState::STATIC && glm::length(vVel) >= 0.0001)
+    {
+        eState = PlayerState::MOVING;
+        vecSignalBuffer.push_back(eState);
+    }
+
     vVel = glm::vec2(0.0f, 0.0f);
     vImpulse *= fFriction;
 }

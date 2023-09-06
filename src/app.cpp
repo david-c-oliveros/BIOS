@@ -8,9 +8,6 @@
 /**********************************/
 /*        Global Variables        */
 /**********************************/
-const char* pMusic_01 = "/res/audio/dark-ambient.wav";
-const char* pMusic_02 = "/res/audio/cyberpunk-2099.mp3";
-
 GameState eState;
 
 float fDeltaTime = 0.0f;
@@ -44,15 +41,16 @@ App::App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
 
 App::~App()
 {
-    ma_device_uninit(&gDevice1);
-    ma_device_uninit(&gDevice2);
-    ma_decoder_uninit(&gDecoderMusic1);
-    ma_decoder_uninit(&gDecoderMusic2);
     glfwTerminate();
 }
 
 
 
+/**************************/
+/*                        */
+/*        L:Create        */
+/*                        */
+/**************************/
 void App::Create()
 {
     Renderer::Init_GLFW(pWindow, nCanvasWidth, nCanvasHeight);
@@ -60,18 +58,10 @@ void App::Create()
     Renderer::Init_GLText();
     GLFWConfig();
 
-    if (!MiniAudioInit(pMusic_01, gDevice1, gDecoderMusic1))
-        return;
+//    pMusic = std::make_unique<Audio>("/res/audio/cyberpunk-2099.mp3");
+//    pMusic->Start();
 
-    if (!MiniAudioStartDevice(gDevice1))
-        return;
-
-    if (!MiniAudioInit(pMusic_02, gDevice2, gDecoderMusic2))
-        return;
-
-    if (!MiniAudioStartDevice(gDevice2))
-        return;
-
+    pMoveSFX = std::make_unique<Audio>("/res/audio/servo.wav");
 
     LoadShaders();
 
@@ -93,9 +83,11 @@ void App::Create()
 
 
 
-/************************/
-/*        Update        */
-/************************/
+/**************************/
+/*                        */
+/*        L:Update        */
+/*                        */
+/**************************/
 void App::Update()
 {
     SetDeltaTime();
@@ -105,8 +97,7 @@ void App::Update()
     {
         case GameState::MENU:
         {
-//            RenderMenu();
-            RenderEndScreen();
+            RenderMenu();
             break;
         }
 
@@ -118,9 +109,14 @@ void App::Update()
 
         case GameState::RUNNING:
         {
-            pPlayer->Update(fDeltaTime);
+            pPlayer->Update(fDeltaTime, vecSignalBuffer);
+
+            ProcessSignals();
+
             CheckForSpecialTiles();
+
             cCamera.OrbitFollow(pPlayer, fDeltaTime);
+
             RenderGame();
             break;
         }
@@ -133,6 +129,38 @@ void App::Update()
 
     glfwSwapBuffers(pWindow);
     glfwPollEvents();
+}
+
+
+
+/***********************************/
+/*                                 */
+/*        L:Process Signals        */
+/*                                 */
+/***********************************/
+void App::ProcessSignals()
+{
+    for (auto &signal : vecSignalBuffer)
+    {
+        switch(signal)
+        {
+            case PlayerState::STATIC:
+            {
+                pMoveSFX->SeekToTime(0);
+                pMoveSFX->Stop();
+                break;
+            }
+
+            case PlayerState::MOVING:
+            {
+                pMoveSFX->SeekToTime(0);
+                pMoveSFX->Start();
+                break;
+            }
+        }
+    }
+
+    vecSignalBuffer.clear();
 }
 
 
@@ -414,6 +442,11 @@ void App::GLFWConfig()
 
 
 
+/*********************************/
+/*                               */
+/*        L:Process Input        */
+/*                               */
+/*********************************/
 void App::ProcessInput()
 {
     switch(eState)
@@ -421,9 +454,6 @@ void App::ProcessInput()
 
         case GameState::RUNNING:
         {
-            if (aKeyStates[(size_t)KEYS::P])
-                pWorld->LoadNextLevel(cShader);
-
             if (aKeyStates[(size_t)KEYS::W])
                 pPlayer->ProcessMovement(EntityMovement::FORWARD, fDeltaTime);
             if (aKeyStates[(size_t)KEYS::S])
@@ -490,6 +520,9 @@ EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* u
         aKeyStates[(size_t)KEYS::LEFT] = true;
     if (!strcmp(e->key, "ArrowRight"))
         aKeyStates[(size_t)KEYS::RIGHT] = true;
+
+    if (!strcmp(e->key, "p"))
+        aKeyStates[(size_t)KEYS::P] = true;
 
     return 0;
 }
@@ -579,6 +612,9 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
     if (!strcmp(e->key, "ArrowRight"))
         aKeyStates[(size_t)KEYS::RIGHT] = false;
 
+    if (!strcmp(e->key, "p"))
+        aKeyStates[(size_t)KEYS::P] = false;
+
     return 0;
 }
 
@@ -589,63 +625,6 @@ EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChan
     emscripten_request_pointerlock("#canvas", 1);
 
     return 0;
-}
-
-
-
-void MA_DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
-{
-    ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
-
-    if (pDecoder == NULL)
-        return;
-
-    ma_decoder_read_pcm_frames(pDecoder, pOutput, nFrameCount, NULL);
-}
-
-
-
-bool MiniAudioInit(const char* pPath, ma_device &gDevice, ma_decoder &gDecoder)
-{
-    ma_result result;
-    ma_device_config gDeviceConfig;
-
-    result = ma_decoder_init_file(pPath, NULL, &gDecoder);
-    if (result != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINAUDIO: Could not load audio file" << std::endl;
-        return false;
-    }
-
-    gDeviceConfig = ma_device_config_init(ma_device_type_playback);
-    gDeviceConfig.playback.format   = gDecoder.outputFormat;
-    gDeviceConfig.playback.channels = gDecoder.outputChannels;
-    gDeviceConfig.sampleRate        = gDecoder.outputSampleRate;
-    gDeviceConfig.dataCallback      = MA_DataCallback;
-    gDeviceConfig.pUserData         = &gDecoder;
-
-    if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINAUDIO: Failed to open playback device" << std::endl;
-        ma_decoder_uninit(&gDecoder);
-        return false;
-    }
-
-    return true;
-}
-
-
-
-bool MiniAudioStartDevice(ma_device &gDevice)
-{
-
-    if (ma_device_start(&gDevice) != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINAUDIO: Failed to start playback device" << std::endl;
-        return false;
-    }
-
-    return true;
 }
 
 
