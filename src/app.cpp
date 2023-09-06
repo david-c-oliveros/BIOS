@@ -8,7 +8,8 @@
 /**********************************/
 /*        Global Variables        */
 /**********************************/
-const char* pMusic = "/res/audio/dark-ambient.wav";
+const char* pMusic_01 = "/res/audio/dark-ambient.wav";
+const char* pMusic_02 = "/res/audio/cyberpunk-2099.mp3";
 
 GameState eState;
 
@@ -34,19 +35,6 @@ std::array<bool, NUM_KEYS> aKeyStates;
 
 
 
-/******************************/
-/*        Audio Engine        */
-/******************************/
-static ma_engine gEngine;
-static ma_sound gSound;
-
-static ma_context gContext;
-static ma_decoder gDecoder;
-
-static ma_device gDevice;
-
-
-
 App::App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
     : nCanvasWidth(_nCanvasWidth), nCanvasHeight(_nCanvasHeight)
 {
@@ -56,9 +44,10 @@ App::App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
 
 App::~App()
 {
-    ma_device_uninit(&gDevice);
-    ma_decoder_uninit(&gDecoder);
-    ma_context_uninit(&gContext);
+    ma_device_uninit(&gDevice1);
+    ma_device_uninit(&gDevice2);
+    ma_decoder_uninit(&gDecoderMusic1);
+    ma_decoder_uninit(&gDecoderMusic2);
     glfwTerminate();
 }
 
@@ -70,6 +59,19 @@ void App::Create()
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, glContext, attrs);
     Renderer::Init_GLText();
     GLFWConfig();
+
+    if (!MiniAudioInit(pMusic_01, gDevice1, gDecoderMusic1))
+        return;
+
+    if (!MiniAudioStartDevice(gDevice1))
+        return;
+
+    if (!MiniAudioInit(pMusic_02, gDevice2, gDecoderMusic2))
+        return;
+
+    if (!MiniAudioStartDevice(gDevice2))
+        return;
+
 
     LoadShaders();
 
@@ -506,11 +508,6 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
             if (!strcmp(e->key, "Enter"))
             {
 
-                if (!MiniAudioHighLevel(pMusic))
-                {
-                    std::cout << "ERROR::MINIAUDIO" << std::endl;
-                }
-
                 pWorld->nCurLevel = 0;
                 pWorld = std::make_shared<World>();
                 if (!pWorld->LoadNextLevel(cShader))
@@ -598,63 +595,20 @@ EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChan
 
 void MA_DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
 {
-    (void)pInput;
-
-    ma_engine_read_pcm_frames((ma_engine*)pDevice->pUserData, pOutput, nFrameCount, NULL);
-}
-
-
-
-void MA_DataCallback_Decoder(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
-{
     ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
+
     if (pDecoder == NULL)
-    {
         return;
-    }
 
     ma_decoder_read_pcm_frames(pDecoder, pOutput, nFrameCount, NULL);
 }
 
 
 
-bool MiniAudioHighLevel(const char* pPath)
+bool MiniAudioInit(const char* pPath, ma_device &gDevice, ma_decoder &gDecoder)
 {
     ma_result result;
     ma_device_config gDeviceConfig;
-
-    ma_device_info* pPlaybackDeviceInfos;
-    ma_uint32 nPlaybackDeviceCount;
-    ma_device_info* pCaptureDeviceInfos;
-    ma_uint32 nCaptureDeviceCount;
-    ma_uint32 iDevice;
-
-    if (ma_context_init(NULL, 0, NULL, &gContext) != MA_SUCCESS)\
-    {
-        std::cout << "ERROR::MINAUDIO: Failed to initialize context" << std::endl;
-        return false;
-    }
-
-    result = ma_context_get_devices(&gContext, &pPlaybackDeviceInfos, &nPlaybackDeviceCount, &pCaptureDeviceInfos, &nCaptureDeviceCount);
-
-    if (ma_context_init(NULL, 0, NULL, &gContext) != MA_SUCCESS)\
-    {
-        std::cout << "ERROR::MINAUDIO: Failed to retrieve device information" << std::endl;
-        return false;
-    }
-
-    std::cout << "Playback Devices:" << std::endl;
-    for (iDevice = 0; iDevice < nPlaybackDeviceCount; iDevice++)
-    {
-        std::cout << "    " << iDevice << ": " << pPlaybackDeviceInfos[iDevice].name << std::endl;
-    }
-
-    std::cout << "Capture Devices:" << std::endl;
-    for (iDevice = 0; iDevice < nPlaybackDeviceCount; iDevice++)
-    {
-        std::cout << "    " << iDevice << ": " << pCaptureDeviceInfos[iDevice].name << std::endl;
-    }
-
 
     result = ma_decoder_init_file(pPath, NULL, &gDecoder);
     if (result != MA_SUCCESS)
@@ -667,7 +621,7 @@ bool MiniAudioHighLevel(const char* pPath)
     gDeviceConfig.playback.format   = gDecoder.outputFormat;
     gDeviceConfig.playback.channels = gDecoder.outputChannels;
     gDeviceConfig.sampleRate        = gDecoder.outputSampleRate;
-    gDeviceConfig.dataCallback      = MA_DataCallback_Decoder;
+    gDeviceConfig.dataCallback      = MA_DataCallback;
     gDeviceConfig.pUserData         = &gDecoder;
 
     if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
@@ -677,73 +631,17 @@ bool MiniAudioHighLevel(const char* pPath)
         return false;
     }
 
-    if (ma_device_start(&gDevice) != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINAUDIO: Failed to start playback device" << std::endl;
-        ma_device_uninit(&gDevice);
-        ma_decoder_uninit(&gDecoder);
-        return false;
-    }
-
     return true;
 }
 
 
 
-bool MiniAudioLowLevel(const char* pPath)
+bool MiniAudioStartDevice(ma_device &gDevice)
 {
-    ma_result result;
-    ma_device_config gDeviceConfig;
-    ma_engine_config gEngineConfig;
-
-    gDeviceConfig = ma_device_config_init(ma_device_type_playback);
-    gDeviceConfig.playback.format   = ma_format_unknown;
-    gDeviceConfig.playback.channels = CHANNELS;
-    gDeviceConfig.sampleRate        = SAMPLE_RATE;
-    gDeviceConfig.dataCallback      = MA_DataCallback;
-
-    gEngineConfig = ma_engine_config_init();
-    gEngineConfig.pDevice    = &gDevice;
-
-    if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINIAUDIO: Failed to open playback device" << std::endl;
-        return false;
-    }
 
     if (ma_device_start(&gDevice) != MA_SUCCESS)
     {
-        std::cout << "ERROR::MINIAUDIO: Failed to start playback device" << std::endl;
-        return false;
-    }
-
-    result = ma_engine_init(&gEngineConfig, &gEngine);
-    if (result != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINIAUDIO: Failed to initialize audio engine." << std::endl;
-        return false;
-    }
-
-    result = ma_engine_start(&gEngine);
-    if (result != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINIAUDIO: Failed to start audio engine." << std::endl;
-        return false;
-    }
-
-    result = ma_sound_init_from_file(&gEngine, pPath, 0, NULL, NULL, &gSound);
-    if (result != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINIAUDIO: Failed to initialize sound." << std::endl;
-        return false;
-    }
-
-    ma_sound_set_looping(&gSound, MA_TRUE);
-
-    result = ma_sound_start(&gSound);
-    if (result != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINIAUDIO: Failed to start sound." << std::endl;
+        std::cout << "ERROR::MINAUDIO: Failed to start playback device" << std::endl;
         return false;
     }
 

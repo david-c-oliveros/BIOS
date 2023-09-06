@@ -72,10 +72,9 @@ EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* u
 EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData);
 void MA_DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
-void MA_DataCallback_Decoder(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
 
-bool MiniAudioLowLevel(const char* pPath);
-bool MiniAudioHighLevel(const char* pPath);
+bool MiniAudioInit(const char* pPath, ma_device &gDevice, ma_decoder &decoder);
+bool MiniAudioStartDevice(ma_device &gDevice);
 float RandFloatInRange(float fMin, float fMax);
 
 
@@ -110,6 +109,16 @@ class App
 
         GLTtext* pScreenText;
         glm::vec3 vTextColor = glm::vec3(1.0f);
+
+        /******************************/
+        /*        Audio Engine        */
+        /******************************/
+        ma_device gDevice1;
+        ma_device gDevice2;
+        ma_decoder gDecoderMusic1;
+        ma_decoder gDecoderMusic2;
+
+
 
     private:
         EmscriptenWebGLContextAttributes attrs;
