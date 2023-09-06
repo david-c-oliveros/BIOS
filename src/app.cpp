@@ -103,7 +103,8 @@ void App::Update()
     {
         case GameState::MENU:
         {
-            RenderMenu();
+//            RenderMenu();
+            RenderEndScreen();
             break;
         }
 
@@ -159,7 +160,7 @@ void App::RenderMenu()
 
     pMenuRobot->Draw(cShader);
 
-    glm::ivec2 vOffset(0, 60);
+    glm::ivec2 vOffset(0, nCanvasWidth * 0.041667);     // 60
     glm::ivec2 vDescPos(nCanvasWidth / 8 + 80, nCanvasHeight / 12);
     glm::ivec2 vMenuPos(nCanvasWidth / 1.4, nCanvasHeight / 3);
 
@@ -173,15 +174,15 @@ void App::RenderMenu()
     Renderer::DrawText(pScreenText, "home to his partition", vDescPos + vOffset * 3, glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
 
     fScale = nCanvasWidth * 0.002778;       // 4.0
-    vOffset.y = 70;
+    vOffset.y = nCanvasWidth * 0.048611;    // 70
     Renderer::DrawText(pScreenText, "[Enter] - Start Game", vMenuPos,           glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
     Renderer::DrawText(pScreenText, "   [C] - Credits",     vMenuPos + vOffset, glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
 
     fScale = nCanvasWidth * 0.002431;       // 3.5
-    Renderer::DrawText(pScreenText, "Controls - WASD",      vMenuPos + vOffset *  3, glm::vec3(1.0f,  1.0f, 1.0f), 3.5f, true);
+    Renderer::DrawText(pScreenText, "Controls - WASD",      vMenuPos + vOffset *  3, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
 
     fScale = nCanvasWidth * 0.001726;       // 2.5
-    vOffset.y = 50;
+    vOffset.y = nCanvasWidth * 0.034722;    // 50
     Renderer::DrawText(pScreenText, "Collect the pointers", vMenuPos + vOffset *  6, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
     Renderer::DrawText(pScreenText, "to access the next",   vMenuPos + vOffset *  7, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
     Renderer::DrawText(pScreenText, "block of memory",      vMenuPos + vOffset *  8, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
@@ -196,37 +197,39 @@ void App::RenderCreditsScreen()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
 
-    glm::ivec2 vOffset(0, 80);
+    glm::ivec2 vOffset(0, nCanvasWidth * 0.055556);     // 80
     glm::ivec2 vTitlePos(nCanvasWidth / 2, nCanvasHeight / 6);
 
-    Renderer::DrawText(pScreenText, "Credits",                              vTitlePos, glm::vec3(1.0f), 6.0f, true);
+    float fScale = nCanvasWidth * 0.004167;             // 6.0
+    Renderer::DrawText(pScreenText, "Credits",                              vTitlePos, glm::vec3(1.0f), fScale, true);
 
-    Renderer::DrawText(pScreenText, "GLFW - glfw.org",                      vTitlePos + vOffset * 2, glm::vec3(1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Emscripten - emscripten.org",          vTitlePos + vOffset * 3, glm::vec3(1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "GLM - github.com/g-truc/glm",          vTitlePos + vOffset * 4, glm::vec3(1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Assimp - assimp.org",                  vTitlePos + vOffset * 5, glm::vec3(1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "glText - gitbub.com/vallentin/glText", vTitlePos + vOffset * 6, glm::vec3(1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Collision algorithm from Javidx9",     vTitlePos + vOffset * 7, glm::vec3(1.0f), 2.5f, true);
+    fScale = nCanvasWidth * 0.001726;                   // 2.5
+    Renderer::DrawText(pScreenText, "GLFW - glfw.org",                      vTitlePos + vOffset * 2, glm::vec3(1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "Emscripten - emscripten.org",          vTitlePos + vOffset * 3, glm::vec3(1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "GLM - github.com/g-truc/glm",          vTitlePos + vOffset * 4, glm::vec3(1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "Assimp - assimp.org",                  vTitlePos + vOffset * 5, glm::vec3(1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "glText - gitbub.com/vallentin/glText", vTitlePos + vOffset * 6, glm::vec3(1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "Collision algorithm from Javidx9",     vTitlePos + vOffset * 7, glm::vec3(1.0f), fScale, true);
 
-    Renderer::DrawText(pScreenText, "[Enter] - Back",     vTitlePos + vOffset * 9, glm::vec3(1.0f), 3.5f, true);
+    fScale = nCanvasWidth * 0.002431;                   // 3.5
+    Renderer::DrawText(pScreenText, "[Enter] - Back",     vTitlePos + vOffset * 9, glm::vec3(1.0f), fScale, true);
 }
 
 
 
 void App::RenderEndScreen()
 {
-    glm::ivec2 vOffset(0, 50);
+    glm::ivec2 vOffset(0, nCanvasWidth * 0.034722);     // 50
+    glm::ivec2 vTitlePos(nCanvasWidth / 2, nCanvasHeight / 2);
+
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
 
-    Renderer::DrawText(pScreenText, "Success!",
-                       glm::ivec2(nCanvasWidth / 2, nCanvasHeight / 2 - vOffset.y * 2),
-                       glm::vec3(1.0f, 1.0f, 1.0f), 8.0f, true);
-    Renderer::DrawText(pScreenText, ("Your time: " + std::to_string(pPlayer->nRunTime)).c_str(),
-                       glm::ivec2(nCanvasWidth / 2, nCanvasHeight / 2 + vOffset.y),
-                       glm::vec3(1.0f, 1.0f, 1.0f), 4.0f, true);
-    Renderer::DrawText(pScreenText, "Press Enter to return to menu",
-                       glm::ivec2(nCanvasWidth / 2, nCanvasHeight / 2 + vOffset.y * 4),
-                       glm::vec3(1.0f, 1.0f, 1.0f), 4.0f, true);
+    float fScale = nCanvasWidth * 0.005556;
+    Renderer::DrawText(pScreenText, "Success!", vTitlePos - vOffset * 2, glm::vec3(1.0f), fScale, true);
+
+    fScale = nCanvasWidth * 0.002778;
+    Renderer::DrawText(pScreenText, ("Your time: " + std::to_string(pPlayer->nRunTime)).c_str(), vTitlePos + vOffset,     glm::vec3(1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "Press Enter to return to menu",                             vTitlePos + vOffset * 4, glm::vec3(1.0f), fScale, true);
 }
 
 
