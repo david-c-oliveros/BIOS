@@ -81,7 +81,6 @@ bool World::LoadNextLevel(Shader &cShader)
     std::string sPath = nCurLevel >= 10 ? "/res/levels/level_" : "/res/levels/level_0";
     std::stringstream ss;
     ss << sPath << nCurLevel << ".lvl";
-    std::cout << "Loading next level" << std::endl;
     if (!LoadLevel(ss.str(), cShader))
     {
         std::cout << "ERROR: Failed to process level" << std::endl;
@@ -226,8 +225,6 @@ bool World::ProcessLevel(std::vector<std::string> vLevelStr, Shader &cShader)
     int32_t nKeyID = vLevelTiles[nPortalIndex].nID;
     if (nKeyID >= 0)
         vLevelTiles[nKeyIndex].nPortalKey = nKeyID;
-
-    PrintLevelInfo();
 
     return true;
 }

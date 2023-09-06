@@ -57,7 +57,7 @@ class World
         glm::vec3 vFogColor = glm::vec3(0.01f);
 
         uint32_t nCurLevel = 0;
-        uint32_t nMaxLevel = 1;
+        uint32_t nMaxLevel = 4;
 
 
     private:

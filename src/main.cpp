@@ -4,7 +4,8 @@
 void MainLoop();
 
 
-App app(1440, 1080);
+//App app(1440, 1080);
+App app(720, 540);
 
 
 int main()

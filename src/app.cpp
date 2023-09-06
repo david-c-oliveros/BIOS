@@ -37,11 +37,13 @@ std::array<bool, NUM_KEYS> aKeyStates;
 /******************************/
 /*        Audio Engine        */
 /******************************/
-ma_result maInitResult;
-ma_engine maAudioEngine;
-ma_sound bgMusic;
-//SoLoud::Soloud gSoloud;
-//SoLoud::Wav gWave;
+static ma_engine gEngine;
+static ma_sound gSound;
+
+static ma_context gContext;
+static ma_decoder gDecoder;
+
+static ma_device gDevice;
 
 
 
@@ -54,9 +56,9 @@ App::App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
 
 App::~App()
 {
-//    gSoloud.deinit();
-    ma_engine_uninit(&maAudioEngine);
-//    olc::SOUND::DestroyAudio();
+    ma_device_uninit(&gDevice);
+    ma_decoder_uninit(&gDecoder);
+    ma_context_uninit(&gContext);
     glfwTerminate();
 }
 
@@ -68,16 +70,6 @@ void App::Create()
     Renderer::Init_WebGL(nCanvasWidth, nCanvasHeight, glContext, attrs);
     Renderer::Init_GLText();
     GLFWConfig();
-
-//    maInitResult = ma_engine_init(NULL, &maAudioEngine);
-//    if (maInitResult != MA_SUCCESS)
-//        std::cout << "ERROR::MINIAUDIO: MiniAudio initialization failed" << std::endl;
-
-//    maInitResult = ma_sound_init_from_file(&maAudioEngine, pMusic, 0, NULL, NULL, &bgMusic);
-//    if (maInitResult != MA_SUCCESS)
-//        std::cout << "ERROR::MINIAUDIO: Failed to load audio file" << std::endl;
-
-//    ma_sound_set_looping(&bgMusic, true);
 
     LoadShaders();
 
@@ -155,10 +147,6 @@ void App::RenderMenu()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
 
-    std::cout << "Camera Pos: " << glm::to_string(cCamera.vPos) << std::endl;
-    std::cout << "Camera Yaw: " << cCamera.fYaw << std::endl;
-    std::cout << "Camera Pitch: " << cCamera.fPitch << std::endl;
-
     glm::mat4 mView = cCamera.GetViewMatrix();
     glm::mat4 mProjection = glm::perspective(glm::radians(cCamera.fZoom), (float)nCanvasWidth / (float)nCanvasHeight,  0.1f, 1000.0f);
 
@@ -175,23 +163,31 @@ void App::RenderMenu()
     glm::ivec2 vDescPos(nCanvasWidth / 8 + 80, nCanvasHeight / 12);
     glm::ivec2 vMenuPos(nCanvasWidth / 1.4, nCanvasHeight / 3);
 
-    Renderer::DrawText(pScreenText, "Bios", glm::ivec2(nCanvasWidth / 1.4, nCanvasHeight / 6), glm::vec3(1.0f, 1.0f, 1.0f), 8.0f, true);
+    float fScale = nCanvasWidth * 0.005556; // 8.0
+    Renderer::DrawText(pScreenText, "Bios", glm::ivec2(nCanvasWidth / 1.4, nCanvasHeight / 6), glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
 
-    Renderer::DrawText(pScreenText, "Bios has just",         vDescPos,               glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "experienced a crash!",  vDescPos + vOffset,     glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Help him get back",     vDescPos + vOffset * 2, glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "home to his partition", vDescPos + vOffset * 3, glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, true);
+    fScale = nCanvasWidth * 0.001736;       // 2.5
+    Renderer::DrawText(pScreenText, "Bios has just",         vDescPos,               glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "experienced a crash!",  vDescPos + vOffset,     glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "Help him get back",     vDescPos + vOffset * 2, glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "home to his partition", vDescPos + vOffset * 3, glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
 
+    fScale = nCanvasWidth * 0.002778;       // 4.0
     vOffset.y = 70;
-    Renderer::DrawText(pScreenText, "Press Enter to begin",  vMenuPos, glm::vec3(1.0f, 1.0f, 1.0f), 4.0f, true);
+    Renderer::DrawText(pScreenText, "[Enter] - Start Game", vMenuPos,           glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "   [C] - Credits",     vMenuPos + vOffset, glm::vec3(1.0f, 1.0f, 1.0f), fScale, true);
 
-    Renderer::DrawText(pScreenText, "Instructions:",           vMenuPos + vOffset * 2, glm::vec3(1.0f,  1.0f, 1.0f), 4.0f, true);
-    Renderer::DrawText(pScreenText, "Controls - WASD",         vMenuPos + vOffset * 3, glm::vec3(1.0f,  1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Collect the pointers",    vMenuPos + vOffset * 4, glm::vec3(1.0f,  1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "to access the next",      vMenuPos + vOffset * 5, glm::vec3(1.0f,  1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "block of memory",         vMenuPos + vOffset * 6, glm::vec3(1.0f,  1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Pointer tiles",           vMenuPos + vOffset * 7, glm::vec3(0.06f, 1.0f, 1.0f), 2.5f, true);
-    Renderer::DrawText(pScreenText, "Exit portal tiles",       vMenuPos + vOffset * 8, glm::vec3(0.06f, 1.0f, 0.0f), 2.5f, true);
+    fScale = nCanvasWidth * 0.002431;       // 3.5
+    Renderer::DrawText(pScreenText, "Controls - WASD",      vMenuPos + vOffset *  3, glm::vec3(1.0f,  1.0f, 1.0f), 3.5f, true);
+
+    fScale = nCanvasWidth * 0.001726;       // 2.5
+    vOffset.y = 50;
+    Renderer::DrawText(pScreenText, "Collect the pointers", vMenuPos + vOffset *  6, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "to access the next",   vMenuPos + vOffset *  7, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "block of memory",      vMenuPos + vOffset *  8, glm::vec3(1.0f,  1.0f, 1.0f), fScale, true);
+
+    Renderer::DrawText(pScreenText, "Pointer tiles",        vMenuPos + vOffset * 10, glm::vec3(0.06f, 1.0f, 1.0f), fScale, true);
+    Renderer::DrawText(pScreenText, "Exit portal tiles",    vMenuPos + vOffset * 11, glm::vec3(0.06f, 1.0f, 0.0f), fScale, true);
 }
 
 
@@ -200,8 +196,19 @@ void App::RenderCreditsScreen()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
 
+    glm::ivec2 vOffset(0, 80);
     glm::ivec2 vTitlePos(nCanvasWidth / 2, nCanvasHeight / 6);
-    Renderer::DrawText(pScreenText, "Credits",  vTitlePos, glm::vec3(1.0f, 1.0f, 1.0f), 6.0f, true);
+
+    Renderer::DrawText(pScreenText, "Credits",                              vTitlePos, glm::vec3(1.0f), 6.0f, true);
+
+    Renderer::DrawText(pScreenText, "GLFW - glfw.org",                      vTitlePos + vOffset * 2, glm::vec3(1.0f), 2.5f, true);
+    Renderer::DrawText(pScreenText, "Emscripten - emscripten.org",          vTitlePos + vOffset * 3, glm::vec3(1.0f), 2.5f, true);
+    Renderer::DrawText(pScreenText, "GLM - github.com/g-truc/glm",          vTitlePos + vOffset * 4, glm::vec3(1.0f), 2.5f, true);
+    Renderer::DrawText(pScreenText, "Assimp - assimp.org",                  vTitlePos + vOffset * 5, glm::vec3(1.0f), 2.5f, true);
+    Renderer::DrawText(pScreenText, "glText - gitbub.com/vallentin/glText", vTitlePos + vOffset * 6, glm::vec3(1.0f), 2.5f, true);
+    Renderer::DrawText(pScreenText, "Collision algorithm from Javidx9",     vTitlePos + vOffset * 7, glm::vec3(1.0f), 2.5f, true);
+
+    Renderer::DrawText(pScreenText, "[Enter] - Back",     vTitlePos + vOffset * 9, glm::vec3(1.0f), 3.5f, true);
 }
 
 
@@ -489,32 +496,18 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
     if (!strcmp(e->key, " "))
         emscripten_request_pointerlock("#canvas", 1);
 
-//    if (!strcmp(e->key, "i"))
-//    {
-//        gSoloud.init();
-//    }
-//
-//    if (!strcmp(e->key, "o"))
-//    {
-//        gWave.load("/res/audio/dark-ambient.wav");
-//    }
-
-    if (!strcmp(e->key, "p"))
-    {
-
-//        olc::SOUND::InitialiseAudio();
-//        olc::SOUND::LoadAudioSample(pMusic);
-//        olc::SOUND::PlaySample(0, true);
-        ma_sound_start(&bgMusic);
-//        gSoloud.play(gWave);
-    }
-
     switch(eState)
     {
         case GameState::MENU:
         {
             if (!strcmp(e->key, "Enter"))
             {
+
+                if (!MiniAudioHighLevel(pMusic))
+                {
+                    std::cout << "ERROR::MINIAUDIO" << std::endl;
+                }
+
                 pWorld->nCurLevel = 0;
                 pWorld = std::make_shared<World>();
                 if (!pWorld->LoadNextLevel(cShader))
@@ -529,6 +522,20 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
                 cCamera.bMenu = false;
                 cCamera.vPos = glm::vec3(0.0f, 10.0f, 0.0f);
                 glfwSetTime(0.0);
+            }
+            else if (!strcmp(e->key, "c"))
+            {
+                eState = GameState::CREDITS;
+            }
+
+            break;
+        }
+
+        case GameState::CREDITS:
+        {
+            if (!strcmp(e->key, "Enter"))
+            {
+                eState = GameState::MENU;
             }
 
             break;
@@ -582,6 +589,162 @@ EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChan
     emscripten_request_pointerlock("#canvas", 1);
 
     return 0;
+}
+
+
+
+void MA_DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
+{
+    (void)pInput;
+
+    ma_engine_read_pcm_frames((ma_engine*)pDevice->pUserData, pOutput, nFrameCount, NULL);
+}
+
+
+
+void MA_DataCallback_Decoder(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
+{
+    ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
+    if (pDecoder == NULL)
+    {
+        return;
+    }
+
+    ma_decoder_read_pcm_frames(pDecoder, pOutput, nFrameCount, NULL);
+}
+
+
+
+bool MiniAudioHighLevel(const char* pPath)
+{
+    ma_result result;
+    ma_device_config gDeviceConfig;
+
+    ma_device_info* pPlaybackDeviceInfos;
+    ma_uint32 nPlaybackDeviceCount;
+    ma_device_info* pCaptureDeviceInfos;
+    ma_uint32 nCaptureDeviceCount;
+    ma_uint32 iDevice;
+
+    if (ma_context_init(NULL, 0, NULL, &gContext) != MA_SUCCESS)\
+    {
+        std::cout << "ERROR::MINAUDIO: Failed to initialize context" << std::endl;
+        return false;
+    }
+
+    result = ma_context_get_devices(&gContext, &pPlaybackDeviceInfos, &nPlaybackDeviceCount, &pCaptureDeviceInfos, &nCaptureDeviceCount);
+
+    if (ma_context_init(NULL, 0, NULL, &gContext) != MA_SUCCESS)\
+    {
+        std::cout << "ERROR::MINAUDIO: Failed to retrieve device information" << std::endl;
+        return false;
+    }
+
+    std::cout << "Playback Devices:" << std::endl;
+    for (iDevice = 0; iDevice < nPlaybackDeviceCount; iDevice++)
+    {
+        std::cout << "    " << iDevice << ": " << pPlaybackDeviceInfos[iDevice].name << std::endl;
+    }
+
+    std::cout << "Capture Devices:" << std::endl;
+    for (iDevice = 0; iDevice < nPlaybackDeviceCount; iDevice++)
+    {
+        std::cout << "    " << iDevice << ": " << pCaptureDeviceInfos[iDevice].name << std::endl;
+    }
+
+
+    result = ma_decoder_init_file(pPath, NULL, &gDecoder);
+    if (result != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINAUDIO: Could not load audio file" << std::endl;
+        return false;
+    }
+
+    gDeviceConfig = ma_device_config_init(ma_device_type_playback);
+    gDeviceConfig.playback.format   = gDecoder.outputFormat;
+    gDeviceConfig.playback.channels = gDecoder.outputChannels;
+    gDeviceConfig.sampleRate        = gDecoder.outputSampleRate;
+    gDeviceConfig.dataCallback      = MA_DataCallback_Decoder;
+    gDeviceConfig.pUserData         = &gDecoder;
+
+    if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINAUDIO: Failed to open playback device" << std::endl;
+        ma_decoder_uninit(&gDecoder);
+        return false;
+    }
+
+    if (ma_device_start(&gDevice) != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINAUDIO: Failed to start playback device" << std::endl;
+        ma_device_uninit(&gDevice);
+        ma_decoder_uninit(&gDecoder);
+        return false;
+    }
+
+    return true;
+}
+
+
+
+bool MiniAudioLowLevel(const char* pPath)
+{
+    ma_result result;
+    ma_device_config gDeviceConfig;
+    ma_engine_config gEngineConfig;
+
+    gDeviceConfig = ma_device_config_init(ma_device_type_playback);
+    gDeviceConfig.playback.format   = ma_format_unknown;
+    gDeviceConfig.playback.channels = CHANNELS;
+    gDeviceConfig.sampleRate        = SAMPLE_RATE;
+    gDeviceConfig.dataCallback      = MA_DataCallback;
+
+    gEngineConfig = ma_engine_config_init();
+    gEngineConfig.pDevice    = &gDevice;
+
+    if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINIAUDIO: Failed to open playback device" << std::endl;
+        return false;
+    }
+
+    if (ma_device_start(&gDevice) != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINIAUDIO: Failed to start playback device" << std::endl;
+        return false;
+    }
+
+    result = ma_engine_init(&gEngineConfig, &gEngine);
+    if (result != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINIAUDIO: Failed to initialize audio engine." << std::endl;
+        return false;
+    }
+
+    result = ma_engine_start(&gEngine);
+    if (result != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINIAUDIO: Failed to start audio engine." << std::endl;
+        return false;
+    }
+
+    result = ma_sound_init_from_file(&gEngine, pPath, 0, NULL, NULL, &gSound);
+    if (result != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINIAUDIO: Failed to initialize sound." << std::endl;
+        return false;
+    }
+
+    ma_sound_set_looping(&gSound, MA_TRUE);
+
+    result = ma_sound_start(&gSound);
+    if (result != MA_SUCCESS)
+    {
+        std::cout << "ERROR::MINIAUDIO: Failed to start sound." << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 

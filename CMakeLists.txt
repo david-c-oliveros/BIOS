@@ -18,11 +18,9 @@ add_executable(${PROJECT_NAME}
     src/mesh.cpp
     src/model.cpp
     src/object.cpp
-    src/box_collider.cpp
     src/shader.cpp
     src/world.cpp
     src/player.cpp
-    src/olcPixelGameEngine.cpp
     )
 
 #add_subdirectory(external/glfw)
@@ -34,13 +32,9 @@ include_directories(
 target_include_directories(${PROJECT_NAME}
     PUBLIC external/glad
     PUBLIC external/glText
-    PUBLIC external/stb
     PUBLIC external/glm
-    PUBLIC external/box2d/include
+    PUBLIC external/minaudio
     PUBLIC external/assimp/include
-    PUBLIC external/olcPixelGameEngine
-    PUBLIC external/olcPixelGameEngine/extensions
-    PUBLIC src/soloud/include
     )
 
 target_link_directories(${PROJECT_NAME}

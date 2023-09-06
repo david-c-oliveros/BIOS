@@ -22,13 +22,7 @@
 
 #include <GLES3/gl3.h>
 
-#include <gltext.h>
-//#include <soloud.h>
-//#include <soloud_wav.h>
-
-#include <olcPixelGameEngine.h>
-#include <olcPGEX_Sound.h>
-#include"miniaudio.h"
+#include "miniaudio.h"
 
 #include "renderer.h"
 #include "shader.h"
@@ -40,6 +34,8 @@
 
 
 #define NUM_KEYS 64
+#define CHANNELS 2
+#define SAMPLE_RATE 48000
 
 
 
@@ -75,6 +71,11 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData);
+void MA_DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
+void MA_DataCallback_Decoder(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
+
+bool MiniAudioLowLevel(const char* pPath);
+bool MiniAudioHighLevel(const char* pPath);
 float RandFloatInRange(float fMin, float fMax);
 
 
