@@ -12,6 +12,10 @@ wc.sh
 miniaudio.h
 soloud
 
+# Audio files
+*.mp3
+*.wav
+
 # Prerequisites
 *.d
 

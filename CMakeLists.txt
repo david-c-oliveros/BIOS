@@ -61,5 +61,5 @@ set_target_properties(${PROJECT_NAME}
     -s USE_LIBPNG=1 \
     -s USE_WEBGL2=1 \
     -s USE_GLFW=3 \
-    --preload-file res \
-    --preload-file shaders")
+    --preload-file ../../res \
+    --preload-file ../../shaders")
