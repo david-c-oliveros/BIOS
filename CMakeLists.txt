@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 2.23.3)
 
-add_compile_options(-Wfatal-errors -w -O2 -D WITH_MINIAUDIO -pthread)
+add_compile_options(-Wfatal-errors -w -pthread)
 
 find_package(OpenGL)
 
 project(App)
-
-set(BOX_2D_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../external/box2d)
 
 add_executable(${PROJECT_NAME}
     external/glad/glad.c
@@ -40,7 +38,6 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE external/glfw/src
-    PRIVATE external/box2d/build/bin
     PRIVATE external/assimp/bin
     )
 
@@ -56,9 +53,9 @@ set_target_properties(${PROJECT_NAME}
     LINK_FLAGS " --bind --emrun \
     -s FORCE_FILESYSTEM \
     -s FULL_ES3=1 \
-    -s WASM=1 \
     -s EXPORT_ALL=1 \
     -s MALLOC=emmalloc \
+    -s WASM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s MIN_WEBGL_VERSION=2 \
     -s USE_LIBPNG=1 \

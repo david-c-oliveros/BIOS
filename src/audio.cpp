@@ -1,8 +1,11 @@
+#define MINIAUDIO_IMPLEMENTATION
+
 #include "audio.h"
 
 
 
-Audio::Audio(const char* pPath)
+Audio::Audio(const char* pPath, Type _eType)
+    : eType(_eType)
 {
     InitMA(pPath);
 }
@@ -18,12 +21,14 @@ Audio::~Audio()
 
 bool Audio::Start()
 {
-
     if (ma_device_start(&gDevice) != MA_SUCCESS)
     {
         std::cout << "ERROR::MINAUDIO: Failed to start playback device" << std::endl;
         return false;
     }
+
+    const char* e[2] = { "audio file", "waveform" };
+    std::cout << "Playing " << e[(size_t)eType] << std::endl;
 
     return true;
 }
@@ -38,6 +43,9 @@ bool Audio::Stop()
         return false;
     }
 
+    const char* e[2] = { "audio file", "waveform" };
+    std::cout << "Stopping " << e[(size_t)eType] << std::endl;
+
     return true;
 }
 
@@ -45,32 +53,64 @@ bool Audio::Stop()
 
 bool Audio::InitMA(const char* pPath)
 {
-    ma_result result;
-    ma_device_config gDeviceConfig;
-
-    result = ma_decoder_init_file(pPath, NULL, &gDecoder);
-    if (result != MA_SUCCESS)
+    switch(eType)
     {
-        std::cout << "ERROR::MINAUDIO: Could not load audio file" << std::endl;
-        return false;
+        case Type::AUDIO_FILE:
+        {
+            ma_result result;
+            ma_device_config gDeviceConfig;
+
+            result = ma_decoder_init_file(pPath, NULL, &gDecoder);
+            if (result != MA_SUCCESS)
+            {
+                std::cout << "ERROR::MINAUDIO: Could not load audio file" << std::endl;
+                return false;
+            }
+
+            gDeviceConfig = ma_device_config_init(ma_device_type_playback);
+            gDeviceConfig.playback.format   = gDecoder.outputFormat;
+            gDeviceConfig.playback.channels = gDecoder.outputChannels;
+            gDeviceConfig.sampleRate        = gDecoder.outputSampleRate;
+            gDeviceConfig.dataCallback      = DataCallback;
+            gDeviceConfig.pUserData         = &gDecoder;
+
+            m_nSampleRate = gDeviceConfig.sampleRate;
+
+            if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
+            {
+                std::cout << "ERROR::MINAUDIO: Failed to open playback device" << std::endl;
+                ma_decoder_uninit(&gDecoder);
+                return false;
+            }
+
+            break;
+        }
+
+        case Type::WAVEFORM:
+        {
+            ma_waveform gSineWave;
+            ma_device_config gDeviceConfig;
+            ma_waveform_config gSineWaveConfig;
+
+            gDeviceConfig = ma_device_config_init(ma_device_type_playback);
+            gDeviceConfig.sampleRate        = 48000;
+            gDeviceConfig.dataCallback      = DataCallbackWaveform;
+            gDeviceConfig.pUserData         = &gSineWave;
+
+            m_nSampleRate = gDeviceConfig.sampleRate;
+
+            if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
+            {
+                std::cout << "ERROR::MINAUDIO: Failed to open playback device" << std::endl;
+                return false;
+            }
+
+            gSineWaveConfig = ma_waveform_config_init(gDevice.playback.format, gDevice.playback.channels, gDevice.sampleRate, ma_waveform_type_sine, 0.2, 220);
+            ma_waveform_init(&gSineWaveConfig, &gSineWave);
+
+            break;
+        }
     }
-
-    gDeviceConfig = ma_device_config_init(ma_device_type_playback);
-    gDeviceConfig.playback.format   = gDecoder.outputFormat;
-    gDeviceConfig.playback.channels = gDecoder.outputChannels;
-    gDeviceConfig.sampleRate        = gDecoder.outputSampleRate;
-    gDeviceConfig.dataCallback      = DataCallback;
-    gDeviceConfig.pUserData         = &gDecoder;
-
-    m_nSampleRate = gDeviceConfig.sampleRate;
-
-    if (ma_device_init(NULL, &gDeviceConfig, &gDevice) != MA_SUCCESS)
-    {
-        std::cout << "ERROR::MINAUDIO: Failed to open playback device" << std::endl;
-        ma_decoder_uninit(&gDecoder);
-        return false;
-    }
-
     return true;
 }
 
@@ -103,12 +143,14 @@ void Audio::DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, 
 
 
 
-void Audio::InputDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
+void Audio::DataCallbackWaveform(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount)
 {
-    ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
+    ma_waveform* pSineWave;
 
-    if (pDecoder == NULL)
-        return;
+//    MA_ASSERT(pDevice->playback.channels == 1);
 
-    ma_decoder_read_pcm_frames(pDecoder, pOutput, nFrameCount, NULL);
+    pSineWave = (ma_waveform*)pDevice->pUserData;
+    MA_ASSERT(pSineWave != NULL);
+
+    ma_waveform_read_pcm_frames(pSineWave, pOutput, nFrameCount, NULL);
 }

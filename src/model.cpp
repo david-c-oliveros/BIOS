@@ -26,7 +26,7 @@ void Model::LoadModel(std::string path)
         std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
     }
 
-    directory = path.substr(0, path.find_last_of('/'));
+  directory = path.substr(0, path.find_last_of('/'));
 
     ProcessNode(scene->mRootNode, scene);
 }

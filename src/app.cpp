@@ -1,4 +1,3 @@
-#define MINIAUDIO_IMPLEMENTATION
 #define GLT_IMPLEMENTATION
 
 #include "app.h"
@@ -19,7 +18,6 @@ float fLast_X = 0.0f;
 float fLast_Y = 0.0f;
 
 bool bFirstMouse = true;
-
 
 Shader cShader;
 std::shared_ptr<World> pWorld;
@@ -58,27 +56,54 @@ void App::Create()
     Renderer::Init_GLText();
     GLFWConfig();
 
-//    pMusic = std::make_unique<Audio>("/res/audio/cyberpunk-2099.mp3");
-//    pMusic->Start();
 
-    pMoveSFX = std::make_unique<Audio>("/res/audio/servo.wav");
+    pMusic = std::make_unique<Audio>("/res/audio/cyberpunk-2099.mp3", Audio::Type::AUDIO_FILE);
+    pMusic->Start();
 
     LoadShaders();
 
-    pScreenText = gltCreateText();
-
-    eState = GameState::MENU;
-
+    /***************************************/
+    /*        L:Loading Menu Object        */
+    /***************************************/
     pMenuRobot = std::make_shared<Object>("/res/models/robot_menu.obj");
     pMenuRobot->vPos = glm::vec3(0.0f);
     pMenuRobot->vCol = glm::vec3(0.1f, 0.3f, 0.3f);
     pMenuRobot->fShininess = 0.0f;
 
+    pScreenText = gltCreateText();
+
+    eState = GameState::MENU;
+
+    /*********************************/
+    /*        L:Loading World        */
+    /*********************************/
+    std::cout << "Loading first level" << std::endl;
+
+    pWorld->nCurLevel = 0;
+    pWorld = std::make_shared<World>();
+    if (!pWorld->LoadNextLevel(cShader))
+        std::cout << "ERROR: Failed to load level" << std::endl;
+
+    std::cout << "Level load complete" << std::endl;
+
+
+    /**********************************/
+    /*        L:Loading Player        */
+    /**********************************/
+    std::cout << "Loading player" << std::endl;
+
+    pPlayer = std::make_unique<Player>(pWorld, "/res/models/robot_01.obj");
+    pPlayer->vPos = glm::vec3(pWorld->GetSpawnLoc()) + glm::vec3(0.5f, 0.0f, 0.5f);
+    pPlayer->vCol = glm::vec3(0.1f, 0.3f, 0.3f);
+    pPlayer->fShininess = 0.0f;
+
+    std::cout << "Player load complete" << std::endl;
+
+
     for (int i = 0; i < NUM_KEYS; i++)
     {
         aKeyStates[i] = false;
     }
-
 }
 
 
@@ -110,8 +135,6 @@ void App::Update()
         case GameState::RUNNING:
         {
             pPlayer->Update(fDeltaTime, vecSignalBuffer);
-
-            ProcessSignals();
 
             CheckForSpecialTiles();
 
@@ -146,15 +169,13 @@ void App::ProcessSignals()
         {
             case PlayerState::STATIC:
             {
-                pMoveSFX->SeekToTime(0);
-                pMoveSFX->Stop();
+                //pMoveSFX->Stop();
                 break;
             }
 
             case PlayerState::MOVING:
             {
-                pMoveSFX->SeekToTime(0);
-                pMoveSFX->Start();
+                //pMoveSFX->Start();
                 break;
             }
         }
@@ -174,6 +195,11 @@ void App::SetDeltaTime()
 
 
 
+/*******************************/
+/*                             */
+/*        L:Render Menu        */
+/*                             */
+/*******************************/
 void App::RenderMenu()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
@@ -223,6 +249,11 @@ void App::RenderMenu()
 
 
 
+/*****************************************/
+/*                                       */
+/*        L:Render Credits Screen        */
+/*                                       */
+/*****************************************/
 void App::RenderCreditsScreen()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
@@ -247,6 +278,11 @@ void App::RenderCreditsScreen()
 
 
 
+/*************************************/
+/*                                   */
+/*        L:Render End Screen        */
+/*                                   */
+/*************************************/
 void App::RenderEndScreen()
 {
     glm::ivec2 vOffset(0, nCanvasWidth * 0.034722);     // 50
@@ -264,6 +300,11 @@ void App::RenderEndScreen()
 
 
 
+/*******************************/
+/*                             */
+/*        L:Render Game        */
+/*                             */
+/*******************************/
 void App::RenderGame()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.1f, 1.0f));
@@ -301,6 +342,11 @@ void App::RenderGame()
 
 
 
+/*******************************************/
+/*                                         */
+/*        L:Check For Special Tiles        */
+/*                                         */
+/*******************************************/
 void App::CheckForSpecialTiles()
 {
     glm::vec2 vPlanarPos = glm::vec2(pPlayer->vPos.x, pPlayer->vPos.z);
@@ -341,6 +387,11 @@ void App::CheckForSpecialTiles()
 
 
 
+/**************************************/
+/*                                    */
+/*        L:Check For ID Match        */
+/*                                    */
+/**************************************/
 bool App::CheckForIDMatch(TileInst &sTile)
 {
     for (auto &nKeyID : pPlayer->vPortalKeys)
@@ -354,6 +405,11 @@ bool App::CheckForIDMatch(TileInst &sTile)
 
 
 
+/*******************************/
+/*                             */
+/*        L:Print Debug        */
+/*                             */
+/*******************************/
 void App::PrintDebug()
 {
     std::cout << "Keys obtained: " << pPlayer->vPortalKeys.size() << std::endl;
@@ -370,6 +426,11 @@ void App::PrintDebug()
 
 
 
+/********************************/
+/*                              */
+/*        L:Load Shaders        */
+/*                              */
+/********************************/
 void App::LoadShaders()
 {
     cShader.Create("shaders/multiple_lights_vs.shader", "shaders/multiple_lights_fs.shader");
@@ -427,6 +488,11 @@ void App::LoadShaders()
 
 
 
+/*******************************/
+/*                             */
+/*        L:GLFW Config        */
+/*                             */
+/*******************************/
 void App::GLFWConfig()
 {
     glfwSetFramebufferSizeCallback(pWindow, Framebuffer_Size_Callback);
@@ -451,7 +517,6 @@ void App::ProcessInput()
 {
     switch(eState)
     {
-
         case GameState::RUNNING:
         {
             if (aKeyStates[(size_t)KEYS::W])
@@ -482,6 +547,11 @@ void App::ProcessInput()
 
 
 
+/*********************************************/
+/*                                           */
+/*        L:Framebuffer Size Callback        */
+/*                                           */
+/*********************************************/
 void Framebuffer_Size_Callback(GLFWwindow* pWindow, int nWidth, int nHeight)
 {
     glViewport(0, 0, nWidth, nHeight);
@@ -489,6 +559,11 @@ void Framebuffer_Size_Callback(GLFWwindow* pWindow, int nWidth, int nHeight)
 
 
 
+/**********************************/
+/*                                */
+/*        L:Mouse Callback        */
+/*                                */
+/**********************************/
 EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userData)
 {
     if (eventType != EMSCRIPTEN_EVENT_MOUSEMOVE)
@@ -501,6 +576,11 @@ EM_BOOL MouseCallback(int eventType, const EmscriptenMouseEvent *e, void* userDa
 
 
 
+/************************************/
+/*                                  */
+/*        L:Keydown Callback        */
+/*                                  */
+/************************************/
 EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData)
 {
     if (!strcmp(e->key, "w"))
@@ -529,6 +609,11 @@ EM_BOOL KeydownCallback(int eventType, const EmscriptenKeyboardEvent* e, void* u
 
 
 
+/**********************************/
+/*                                */
+/*        L:Keyup Callback        */
+/*                                */
+/**********************************/
 EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* userData)
 {
     if (!strcmp(e->key, " "))
@@ -540,17 +625,6 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
         {
             if (!strcmp(e->key, "Enter"))
             {
-
-                pWorld->nCurLevel = 0;
-                pWorld = std::make_shared<World>();
-                if (!pWorld->LoadNextLevel(cShader))
-                    std::cout << "ERROR: Failed to load level" << std::endl;
-
-                pPlayer = std::make_unique<Player>(pWorld, "/res/models/robot_01.obj");
-                pPlayer->vPos = glm::vec3(pWorld->GetSpawnLoc()) + glm::vec3(0.5f, 0.0f, 0.5f);
-                pPlayer->vCol = glm::vec3(0.1f, 0.3f, 0.3f);
-                pPlayer->fShininess = 0.0f;
-
                 eState = GameState::RUNNING;
                 cCamera.bMenu = false;
                 cCamera.vPos = glm::vec3(0.0f, 10.0f, 0.0f);
@@ -620,6 +694,11 @@ EM_BOOL KeyupCallback(int eventType, const EmscriptenKeyboardEvent* e, void* use
 
 
 
+/***********************************************/
+/*                                             */
+/*        L:Pointerlock Change Callback        */
+/*                                             */
+/***********************************************/
 EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChangeEvent* e, void* userData)
 {
     emscripten_request_pointerlock("#canvas", 1);
@@ -629,6 +708,11 @@ EM_BOOL PointerlockChangeCallback(int eventType, const EmscriptenPointerlockChan
 
 
 
+/*****************************************/
+/*                                       */
+/*        L:Random Float In Range        */
+/*                                       */
+/*****************************************/
 float RandFloatInRange(float fMin, float fMax)
 {
     uint32_t nMin = (uint32_t)(fMin * 10000);

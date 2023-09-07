@@ -22,8 +22,6 @@
 
 #include <GLES3/gl3.h>
 
-#include "miniaudio.h"
-
 #include "renderer.h"
 #include "shader.h"
 #include "object.h"
@@ -97,6 +95,8 @@ class App
         void LoadShaders();
         void LoadText();
         void ProcessInput();
+
+        void RunAudio();
 
 
     public:

@@ -9,7 +9,14 @@
 class Audio
 {
     public:
-        Audio(const char* pPath);
+        enum class Type
+        {
+            AUDIO_FILE,
+            WAVEFORM
+        };
+
+    public:
+        Audio(const char* pPath, Type _eType);
         ~Audio();
 
         bool Start();
@@ -23,6 +30,7 @@ class Audio
         /******************************/
         ma_device gDevice;
         ma_decoder gDecoder;
+        Type eType;
 
         uint32_t m_nSampleRate;
 
@@ -30,5 +38,5 @@ class Audio
     private:
         bool InitMA(const char* pPath);
         static void DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
-        static void InputDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
+        static void DataCallbackWaveform(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 nFrameCount);
 };
